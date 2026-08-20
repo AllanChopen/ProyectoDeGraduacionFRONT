@@ -1,0 +1,72 @@
+.site-footer {
+  margin-top: 4rem;
+  background: linear-gradient(180deg, #120a14, #0d0107);
+  border-top: 1px solid rgba(167, 148, 148, 0.2);
+  position: relative;
+  padding-top: 3rem;
+}
+
+.footer-grid {
+  width: min(1400px, 92%);
+  margin-inline: auto;
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.footer-brand .logo.small .logo-text {
+  font-family: 'Flying Hollander', system-ui, sans-serif;
+  font-size: 1.2rem;
+  color: #f0e7e8;
+}
+
+.social-contact-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.social-contact-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.contact-text {
+  color: #e0d4d8;
+  font-size: 0.95rem;
+}
+
+.footer-logo-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.footer-logo-right img {
+  width: 90px;
+  height: auto;
+  opacity: 0.9;
+}
+
+.sub-footer {
+  margin-top: 2.2rem;
+  padding: 1.15rem 0;
+  border-top: 1px solid rgba(167, 148, 148, 0.22);
+  text-align: center;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: #8f7c82;
+}
+
+@media (max-width: 900px) {
+  .footer-logo-right {
+    justify-content: flex-start;
+  }
+
+  .footer-logo-right img {
+    width: 72px;
+  }
+}

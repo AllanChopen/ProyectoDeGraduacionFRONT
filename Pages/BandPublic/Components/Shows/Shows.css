@@ -1,0 +1,38 @@
+.bp-shows {
+  margin-top: 2rem;
+}
+
+.bp-show-card {
+  min-width: 260px;
+  max-width: 320px;
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  background: var(--bp-surface-alt);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.bp-show-image {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+}
+
+.bp-show-card .bp-card-content {
+  padding: 1rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.bp-show-footer {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--bp-text-faint);
+}

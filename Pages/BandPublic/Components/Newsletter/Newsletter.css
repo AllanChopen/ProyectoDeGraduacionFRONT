@@ -1,0 +1,88 @@
+.bp-newsletter-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.bp-newsletter-panel {
+  width: min(520px, 100%);
+}
+
+.bp-newsletter-note {
+  margin-top: 0.6rem;
+  color: var(--bp-text-muted);
+  font-size: 0.92rem;
+}
+
+.bp-inline-link {
+  color: var(--bp-brand-accent);
+  background: transparent;
+  border: 0;
+  margin-left: 0.3rem;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+}
+
+.bp-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  padding: 1rem;
+}
+
+.bp-modal-card,
+.bp-popup-card {
+  width: min(520px, 100%);
+  border-radius: 10px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 12px 40px rgba(2, 6, 23, 0.7);
+}
+
+.bp-popup-card {
+  background: linear-gradient(180deg, #0f1113, #0b0b0d);
+  color: #e6e6e6;
+}
+
+.bp-modal-card {
+  background: var(--bp-bg);
+}
+
+.bp-modal-close {
+  float: right;
+  background: none;
+  border: 0;
+  color: #bfb8ad;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.bp-unsubscribe-actions {
+  margin-top: 0.8rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.4rem;
+}
+
+.bp-unsubscribe-message {
+  margin-top: 0.65rem;
+  color: #bfb8ad;
+  min-height: 1.3rem;
+  font-size: 0.9rem;
+}
+
+.bp-popup-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem;
+}
+
+@media (max-width: 640px) {
+  .bp-popup-form {
+    grid-template-columns: 1fr;
+  }
+}

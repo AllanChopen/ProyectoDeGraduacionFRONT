@@ -1,0 +1,218 @@
+@font-face {
+  font-family: 'Flying Hollander';
+  src: url('/fonts/FlyingHollander.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem clamp(1rem, 4vw, 3rem);
+  backdrop-filter: blur(18px) saturate(1.25);
+  background: rgba(16, 4, 24, 0.82);
+  border-bottom: 1px solid rgba(167, 148, 148, 0.12);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  text-decoration: none;
+}
+
+.logo-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-mark img {
+  width: 34px;
+  height: auto;
+  display: block;
+}
+
+.logo-text {
+  font-family: 'Flying Hollander', system-ui, sans-serif;
+  font-size: 1rem;
+  color: #ffffff;
+}
+
+.site-nav ul {
+  list-style: none;
+  display: flex;
+  gap: clamp(1rem, 2.2vw, 2.8rem);
+  margin: 0;
+  padding: 0;
+}
+
+.site-nav a {
+  color: #c9bfc6;
+  font-size: 0.86rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  position: relative;
+  padding: 0.2rem 0;
+}
+
+.site-nav a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  height: 2px;
+  width: 0;
+  background: linear-gradient(115deg, #5a4252, #0e213a 58%, #a79494);
+  transition: width 0.35s;
+}
+
+.site-nav a:hover,
+.site-nav a:focus {
+  color: #fff;
+}
+
+.site-nav a:hover::after,
+.site-nav a:focus::after {
+  width: 100%;
+}
+
+.nav-social {
+  display: none;
+}
+
+.ico {
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #1e1621, #130d14);
+  box-shadow: 0 0 0 1px rgba(167, 148, 148, 0.12);
+}
+
+.ico img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.header-cart {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: #e9e4e6;
+  text-decoration: none;
+}
+
+.cart-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.cart-text {
+  font-family: 'Flying Hollander', system-ui, sans-serif;
+  font-size: 0.95rem;
+}
+
+.cart-count {
+  background: #7d5d6d;
+  color: #fff;
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 0.78rem;
+  line-height: 1;
+  min-width: 20px;
+  text-align: center;
+}
+
+.nav-toggle {
+  display: none;
+  width: 46px;
+  height: 42px;
+  border: 1px solid rgba(167, 148, 148, 0.25);
+  background: rgba(16, 4, 24, 0.55);
+  border-radius: 5px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 7px;
+}
+
+.nav-toggle span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: #e9e4e6;
+  margin-inline: auto;
+  border-radius: 4px;
+  transition: transform 0.3s, opacity 0.3s;
+}
+
+.nav-toggle.active span:nth-child(1) {
+  transform: translateY(9px) rotate(45deg);
+}
+
+.nav-toggle.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.nav-toggle.active span:nth-child(3) {
+  transform: translateY(-9px) rotate(-45deg);
+}
+
+@media (max-width: 900px) {
+  .nav-toggle {
+    display: flex;
+  }
+
+  .header-cart {
+    position: static;
+    transform: none;
+    margin-left: auto;
+    margin-right: 0.6rem;
+  }
+
+  .cart-text {
+    display: none;
+  }
+
+  .site-nav {
+    display: none;
+  }
+
+  .site-nav.open {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    background: rgba(13, 1, 7, 0.96);
+    padding: 1.2rem 1rem;
+    border-bottom: 1px solid rgba(167, 148, 148, 0.1);
+  }
+
+  .site-nav ul {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .nav-social {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.6rem;
+  }
+}

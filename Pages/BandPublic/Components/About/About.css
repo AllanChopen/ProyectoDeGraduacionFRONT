@@ -1,0 +1,75 @@
+.bp-about-section {
+  position: relative;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  background: linear-gradient(180deg, #0d0107, #120816 75%);
+}
+
+.bp-about-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(13, 1, 7, 0.45), rgba(13, 1, 7, 0.88));
+  z-index: 0;
+}
+
+.bp-about-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 2rem;
+  align-items: start;
+}
+
+.bp-about-card {
+  background: linear-gradient(150deg, #1e151c, #130c13 75%);
+  border: 1px solid var(--bp-border);
+  border-radius: 10px;
+  padding: clamp(1.1rem, 3vw, 1.7rem);
+}
+
+.bp-about-title {
+  margin: 0 0 0.85rem;
+  font-family: 'Flying Hollander', system-ui, sans-serif;
+  font-size: clamp(1.6rem, 3.8vw, 2.4rem);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  background: linear-gradient(90deg, #f0ecee, #c9bec0 40%, #a79494);
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.bp-about-members-title {
+  margin: 0 0 0.7rem;
+  color: var(--bp-text);
+  font-size: 1rem;
+}
+
+.bp-about-text {
+  margin: 0 0 1.1rem;
+  color: var(--bp-text-muted);
+  line-height: 1.7;
+}
+
+.bp-member-list {
+  margin: 0;
+  padding-left: 1rem;
+  color: var(--bp-text-muted);
+}
+
+.bp-member-list li {
+  margin-bottom: 0.45rem;
+}
+
+@media (max-width: 900px) {
+  .bp-about-grid {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
+
+  .bp-about-section::before {
+    background: linear-gradient(180deg, rgba(13, 1, 7, 0.6), rgba(13, 1, 7, 0.95));
+  }
+}

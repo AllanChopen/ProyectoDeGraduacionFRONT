@@ -1,7 +1,8 @@
+
+import BandPublic from '../Pages/BandPublic/BandPublic';
+
 function App() {
-    return (
-        <h1>Hello World 👋</h1>
-    );
+    return <BandPublic />;
 }
 
 export default App;
