@@ -1,0 +1,27 @@
+.store-page {
+	display: flex;
+	flex-direction: column;
+}
+
+.store-hero {
+	padding-bottom: 1.5rem;
+}
+
+.store-subtitle {
+	max-width: 720px;
+	margin: 1rem auto 0;
+	text-align: center;
+	color: var(--bp-text-muted);
+	line-height: 1.6;
+}
+
+.store-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+	gap: 1rem;
+}
+
+.store-product-card {
+	min-width: 0;
+	max-width: 100%;
+}

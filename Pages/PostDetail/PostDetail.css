@@ -1,0 +1,78 @@
+.post-detail-page {
+  display: flex;
+  flex-direction: column;
+}
+
+.post-article {
+  width: min(980px, 92%);
+  margin-inline: auto;
+  display: grid;
+  gap: 1rem;
+}
+
+.post-header {
+  text-align: center;
+}
+
+.post-kicker {
+  margin: 0;
+  color: var(--bp-text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+}
+
+.post-title {
+  margin: 0.3rem 0 0;
+}
+
+.post-date {
+  margin: 0.9rem 0 0;
+  color: var(--bp-text-faint);
+  font-size: 0.9rem;
+}
+
+.post-cover-wrap {
+  background: var(--bp-surface-alt);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.post-cover {
+  width: 100%;
+  height: clamp(220px, 40vw, 420px);
+  object-fit: cover;
+  display: block;
+}
+
+.post-content {
+  padding: 1.2rem;
+}
+
+.post-lead {
+  margin: 0;
+  color: var(--bp-text);
+  line-height: 1.65;
+  font-size: 1.02rem;
+}
+
+.post-paragraph {
+  margin: 1rem 0 0;
+  color: var(--bp-text-muted);
+  line-height: 1.75;
+}
+
+.post-actions {
+  margin-top: 1.4rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.post-subtitle {
+  max-width: 640px;
+  margin: 1rem auto 0;
+  text-align: center;
+  color: var(--bp-text-muted);
+}

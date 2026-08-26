@@ -111,19 +111,19 @@
   transform: translate(-50%, -50%);
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
+  justify-content: center;
   color: #e9e4e6;
   text-decoration: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  background: linear-gradient(145deg, #1e1621, #130d14);
+  box-shadow: 0 0 0 1px rgba(167, 148, 148, 0.12);
 }
 
 .cart-icon {
-  width: 20px;
-  height: 20px;
-}
-
-.cart-text {
-  font-family: 'Flying Hollander', system-ui, sans-serif;
-  font-size: 0.95rem;
+  width: 18px;
+  height: 18px;
 }
 
 .cart-count {
@@ -135,6 +135,9 @@
   line-height: 1;
   min-width: 20px;
   text-align: center;
+  position: absolute;
+  top: -6px;
+  right: -6px;
 }
 
 .nav-toggle {
@@ -181,10 +184,6 @@
     transform: none;
     margin-left: auto;
     margin-right: 0.6rem;
-  }
-
-  .cart-text {
-    display: none;
   }
 
   .site-nav {

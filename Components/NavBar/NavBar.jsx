@@ -1,14 +1,17 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useCart } from '../../src/context/CartContext';
 import './Navbar.css';
 
 function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
+  const { merchTotalItems } = useCart();
 
   const closeMenu = () => setIsOpen(false);
 
   return (
     <header className="site-header">
-      <a href="#hero" className="logo" onClick={closeMenu}>
+      <a href="/#hero" className="logo" onClick={closeMenu}>
         <span className="logo-mark" aria-hidden="true">
           <img src="/icons/cart.svg" alt="Brand icon" />
         </span>
@@ -18,34 +21,39 @@ function NavBar() {
       <nav className={`site-nav ${isOpen ? 'open' : ''}`} aria-label="Main Navigation">
         <ul>
           <li>
-            <a href="#hero" onClick={closeMenu}>
+            <a href="/#hero" onClick={closeMenu}>
               Home
             </a>
           </li>
           <li>
-            <a href="#about" onClick={closeMenu}>
+            <a href="/#about" onClick={closeMenu}>
               About
             </a>
           </li>
           <li>
-            <a href="#products" onClick={closeMenu}>
+            <a href="/#products" onClick={closeMenu}>
               Merch
             </a>
           </li>
           <li>
-            <a href="#posts" onClick={closeMenu}>
+            <a href="/#posts" onClick={closeMenu}>
               Blog
             </a>
           </li>
           <li>
-            <a href="#shows" onClick={closeMenu}>
+            <a href="/#shows" onClick={closeMenu}>
               Shows
             </a>
           </li>
           <li>
-            <a href="#contact" onClick={closeMenu}>
+            <a href="/#contact" onClick={closeMenu}>
               Contacto
             </a>
+          </li>
+          <li>
+            <Link to="/dashboard" onClick={closeMenu}>
+              Dashboard
+            </Link>
           </li>
         </ul>
 
@@ -86,11 +94,10 @@ function NavBar() {
         </div>
       </nav>
 
-      <a href="#products" aria-label="Carrito" className="header-cart" title="Carrito">
+      <Link to="/carrito" aria-label="Carrito de merch" className="header-cart" title="Carrito de merch">
         <img src="/icons/cart.svg" alt="Cart" className="cart-icon" />
-        <span className="cart-text">Carrito</span>
-        <span className="cart-count">0</span>
-      </a>
+        <span className="cart-count">{merchTotalItems}</span>
+      </Link>
 
       <button
         type="button"

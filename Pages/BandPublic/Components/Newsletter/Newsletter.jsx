@@ -2,9 +2,20 @@ import { useEffect, useState } from 'react';
 import './Newsletter.css';
 
 const POPUP_KEY = 'seen_subscribe_popup_v1';
+const NEWSLETTER_SUBSCRIBERS_KEY = 'lito_newsletter_subscribers_v1';
+
+function getSubscribers() {
+  const saved = localStorage.getItem(NEWSLETTER_SUBSCRIBERS_KEY);
+  return saved ? JSON.parse(saved) : [];
+}
+
+function saveSubscribers(subscribers) {
+  localStorage.setItem(NEWSLETTER_SUBSCRIBERS_KEY, JSON.stringify(subscribers));
+}
 
 function Newsletter() {
   const [email, setEmail] = useState('');
+  const [popupEmail, setPopupEmail] = useState('');
   const [unsubscribeEmail, setUnsubscribeEmail] = useState('');
   const [message, setMessage] = useState('');
   const [popupMessage, setPopupMessage] = useState('');
@@ -22,6 +33,13 @@ function Newsletter() {
 
   const handleSubscribe = (event) => {
     event.preventDefault();
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const subscribers = getSubscribers();
+    if (!subscribers.includes(normalizedEmail)) {
+      saveSubscribers([normalizedEmail, ...subscribers]);
+    }
+
     setMessage('Gracias por suscribirte. Recibiras noticias, shows y lanzamientos.');
     setEmail('');
     localStorage.setItem(POPUP_KEY, '1');
@@ -30,7 +48,15 @@ function Newsletter() {
 
   const handlePopupSubscribe = (event) => {
     event.preventDefault();
+
+    const normalizedEmail = popupEmail.trim().toLowerCase();
+    const subscribers = getSubscribers();
+    if (normalizedEmail && !subscribers.includes(normalizedEmail)) {
+      saveSubscribers([normalizedEmail, ...subscribers]);
+    }
+
     setPopupMessage('Suscripcion completada. Bienvenido al canal de noticias.');
+    setPopupEmail('');
     localStorage.setItem(POPUP_KEY, '1');
     setTimeout(() => setShowPopup(false), 700);
   };
@@ -41,6 +67,11 @@ function Newsletter() {
       setUnsubscribeMessage('Ingresa un correo valido.');
       return;
     }
+
+    const normalizedEmail = unsubscribeEmail.trim().toLowerCase();
+    const subscribers = getSubscribers();
+    const updatedSubscribers = subscribers.filter((subscriber) => subscriber !== normalizedEmail);
+    saveSubscribers(updatedSubscribers);
 
     setUnsubscribeMessage('Tu correo fue removido del canal de noticias.');
     setUnsubscribeEmail('');
@@ -142,7 +173,14 @@ function Newsletter() {
               Recibe noticias, shows y lanzamientos exclusivos. Sin spam, puedes darte de baja en cualquier momento.
             </p>
             <form className="bp-popup-form" onSubmit={handlePopupSubscribe}>
-              <input type="email" className="bp-field" placeholder="Tu correo" required />
+              <input
+                type="email"
+                className="bp-field"
+                placeholder="Tu correo"
+                required
+                value={popupEmail}
+                onChange={(event) => setPopupEmail(event.target.value)}
+              />
               <button type="submit" className="bp-btn bp-btn-small">
                 Suscribirme
               </button>

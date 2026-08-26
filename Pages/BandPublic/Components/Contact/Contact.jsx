@@ -1,11 +1,28 @@
 import { useState } from 'react';
 import './Contact.css';
 
+const CONTACT_MESSAGES_KEY = 'lito_contact_messages_v1';
+
 function Contact() {
   const [message, setMessage] = useState('');
 
   const handleSubmit = (event) => {
     event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
+    const entry = {
+      id: Date.now(),
+      name: String(formData.get('name') ?? '').trim(),
+      email: String(formData.get('email') ?? '').trim(),
+      phone: String(formData.get('phone') ?? '').trim(),
+      message: String(formData.get('message') ?? '').trim(),
+      createdAt: new Date().toISOString()
+    };
+
+    const saved = localStorage.getItem(CONTACT_MESSAGES_KEY);
+    const messages = saved ? JSON.parse(saved) : [];
+    localStorage.setItem(CONTACT_MESSAGES_KEY, JSON.stringify([entry, ...messages]));
+
     setMessage('Gracias, recibimos tu mensaje y responderemos pronto.');
     event.currentTarget.reset();
   };

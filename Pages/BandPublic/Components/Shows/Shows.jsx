@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import './Shows.css';
 
 function Shows({ shows }) {
@@ -75,9 +76,9 @@ function Shows({ shows }) {
                 <p className="bp-meta">{show.date}</p>
                 <div className="bp-show-footer">
                   <small>{show.status}</small>
-                  <a href={show.link} className="bp-btn bp-btn-small">
-                    Detalles
-                  </a>
+                  <Link to={`/shows/${show.id}`} className="bp-btn bp-btn-small">
+                    Comprar
+                  </Link>
                 </div>
               </div>
             </article>
@@ -86,9 +87,9 @@ function Shows({ shows }) {
       </div>
 
       <div className="bp-more-wrap">
-        <a href="#" className="bp-btn">
+        <Link to="/shows" className="bp-btn">
           Mostrar mas shows
-        </a>
+        </Link>
       </div>
     </section>
   );

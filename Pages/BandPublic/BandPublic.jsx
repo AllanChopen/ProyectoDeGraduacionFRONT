@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import './BandPublic.css';
 import NavBar from '../../Components/NavBar/NavBar';
 import Footer from '../../Components/Footer/Footer';
@@ -9,6 +10,7 @@ import Posts from './Components/Posts/Posts';
 import Contact from './Components/Contact/Contact';
 import Newsletter from './Components/Newsletter/Newsletter';
 import heroImage from '../../src/assets/hero.png';
+import { getManagedPosts, getManagedProducts, getManagedShows } from './bandPublicData';
 
 const aboutParagraphs = [
   'Fundada en la ciudad de Guatemala, Lost in the Ocean es una banda inspirada en la agresividad de los sonidos distorsionados combinada con la belleza de melodias nostalgicas y letras intencionadas que buscan retar el oido del publico guatemalteco.',
@@ -24,94 +26,17 @@ const members = [
   'Fernando Trigueros - Baterista, voces de apoyo'
 ];
 
-const products = [
-  {
-    id: 1,
-    name: 'Camiseta LITO Black',
-    type: 'Playera',
-    price: 140,
-    image: heroImage,
-    link: '#'
-  },
-  {
-    id: 2,
-    name: 'Poster Tour 2026',
-    type: 'Poster',
-    price: 65,
-    image: heroImage,
-    link: '#'
-  },
-  {
-    id: 3,
-    name: 'Sticker Pack',
-    type: 'Accesorio',
-    price: 35,
-    image: heroImage,
-    link: '#'
-  }
-];
-
-const shows = [
-  {
-    id: 1,
-    title: 'Ritmos En Resistencia',
-    venue: 'Interfer',
-    location: 'Ciudad de Guatemala, Guatemala',
-    date: '14 Sep 2026 - 19:30',
-    status: 'Confirmado',
-    poster: heroImage,
-    link: '#'
-  },
-  {
-    id: 2,
-    title: 'Noise Circuit',
-    venue: 'La Bodega Sonora',
-    location: 'Antigua Guatemala, Guatemala',
-    date: '03 Oct 2026 - 20:00',
-    status: 'Boletos disponibles',
-    poster: heroImage,
-    link: '#'
-  },
-  {
-    id: 3,
-    title: 'Furia y Melodia',
-    venue: 'Distrito Rock',
-    location: 'Quetzaltenango, Guatemala',
-    date: '25 Oct 2026 - 18:30',
-    status: 'Proximamente',
-    poster: heroImage,
-    link: '#'
-  }
-];
-
-const posts = [
-  {
-    id: 1,
-    title: 'Nuevo sencillo en produccion',
-    excerpt: 'Entramos a estudio para grabar nuestro primer material oficial.',
-    date: '02 Ago 2026',
-    image: heroImage,
-    link: '#'
-  },
-  {
-    id: 2,
-    title: 'Backstage de Interfer',
-    excerpt: 'Compartimos fotos y momentos del show en Interfer.',
-    date: '11 Jul 2026',
-    image: heroImage,
-    link: '#'
-  },
-  {
-    id: 3,
-    title: 'Anuncio de nueva fecha',
-    excerpt: 'Nos vemos en Quetzaltenango para cerrar octubre con ruido.',
-    date: '22 Jun 2026',
-    image: heroImage,
-    link: '#'
-  }
-];
-
 function BandPublic() {
+  const [products, setProducts] = useState([]);
+  const [shows, setShows] = useState([]);
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    setProducts(getManagedProducts());
+    setShows(getManagedShows());
+    setPosts(getManagedPosts());
+  }, []);
+
   return (
     <main className="bp-page">
       <NavBar />

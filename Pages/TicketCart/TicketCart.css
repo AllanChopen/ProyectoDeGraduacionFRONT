@@ -1,0 +1,77 @@
+.ticket-cart-page {
+  display: flex;
+  flex-direction: column;
+}
+
+.ticket-cart-subtitle {
+  max-width: 760px;
+  margin: 1rem auto 0;
+  text-align: center;
+  color: var(--bp-text-muted);
+}
+
+.ticket-cart-empty {
+  width: min(760px, 92%);
+  margin: 0 auto;
+  display: grid;
+  gap: 1rem;
+  justify-items: center;
+  text-align: center;
+}
+
+.ticket-cart-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.ticket-cart-items {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.ticket-cart-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: var(--bp-surface-alt);
+}
+
+.ticket-cart-item-actions {
+  display: grid;
+  gap: 0.5rem;
+  justify-items: end;
+}
+
+.ticket-cart-qty {
+  width: 90px;
+}
+
+.ticket-cart-summary {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.ticket-cart-total {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--bp-text);
+}
+
+@media (max-width: 900px) {
+  .ticket-cart-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ticket-cart-item {
+    flex-direction: column;
+  }
+
+  .ticket-cart-item-actions {
+    justify-items: start;
+  }
+}

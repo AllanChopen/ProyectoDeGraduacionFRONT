@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import './Products.css';
 
 function Products({ products }) {
@@ -72,9 +73,9 @@ function Products({ products }) {
                 <strong>{product.name}</strong>
                 <p className="bp-meta">{product.type}</p>
                 <p className="bp-price">Q{product.price.toFixed(2)}</p>
-                <a href={product.link} className="bp-btn bp-btn-small">
+                <Link to={`/tienda/producto/${product.id}`} className="bp-btn bp-btn-small">
                   Ver
-                </a>
+                </Link>
               </div>
             </article>
           ))}
@@ -82,9 +83,9 @@ function Products({ products }) {
       </div>
 
       <div className="bp-more-wrap">
-        <a href="#" className="bp-btn">
+        <Link to="/tienda" className="bp-btn">
           Ver tienda completa
-        </a>
+        </Link>
       </div>
     </section>
   );

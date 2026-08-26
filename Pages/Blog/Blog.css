@@ -1,0 +1,27 @@
+.blog-page {
+  display: flex;
+  flex-direction: column;
+}
+
+.blog-hero {
+  padding-bottom: 1.5rem;
+}
+
+.blog-subtitle {
+  max-width: 720px;
+  margin: 1rem auto 0;
+  text-align: center;
+  color: var(--bp-text-muted);
+  line-height: 1.6;
+}
+
+.blog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.blog-post-card {
+  min-width: 0;
+  max-width: 100%;
+}

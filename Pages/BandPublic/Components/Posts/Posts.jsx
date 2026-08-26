@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import './Posts.css';
 
 function Posts({ posts }) {
@@ -73,9 +74,9 @@ function Posts({ posts }) {
                 <p className="bp-meta">{post.excerpt}</p>
                 <div className="bp-show-footer">
                   <small>{post.date}</small>
-                  <a href={post.link} className="bp-btn bp-btn-small">
+                  <Link to={`/blog/${post.id}`} className="bp-btn bp-btn-small">
                     Leer
-                  </a>
+                  </Link>
                 </div>
               </div>
             </article>
@@ -84,9 +85,9 @@ function Posts({ posts }) {
       </div>
 
       <div className="bp-more-wrap">
-        <a href="#" className="bp-btn">
+        <Link to="/blog" className="bp-btn">
           Mostrar mas
-        </a>
+        </Link>
       </div>
     </section>
   );

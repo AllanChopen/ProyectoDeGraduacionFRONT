@@ -1,0 +1,27 @@
+.tickets-page {
+	display: flex;
+	flex-direction: column;
+}
+
+.tickets-hero {
+	padding-bottom: 1.5rem;
+}
+
+.tickets-subtitle {
+	max-width: 720px;
+	margin: 1rem auto 0;
+	text-align: center;
+	color: var(--bp-text-muted);
+	line-height: 1.6;
+}
+
+.tickets-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+	gap: 1rem;
+}
+
+.tickets-show-card {
+	min-width: 0;
+	max-width: 100%;
+}
