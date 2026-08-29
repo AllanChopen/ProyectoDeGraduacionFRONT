@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import './BandPublic.css';
 import NavBar from '../../Components/NavBar/NavBar';
 import Footer from '../../Components/Footer/Footer';
@@ -10,41 +11,91 @@ import Posts from './Components/Posts/Posts';
 import Contact from './Components/Contact/Contact';
 import Newsletter from './Components/Newsletter/Newsletter';
 import heroImage from '../../src/assets/hero.png';
-import { getManagedPosts, getManagedProducts, getManagedShows } from './bandPublicData';
-
-const aboutParagraphs = [
-  'Fundada en la ciudad de Guatemala, Lost in the Ocean es una banda inspirada en la agresividad de los sonidos distorsionados combinada con la belleza de melodias nostalgicas y letras intencionadas que buscan retar el oido del publico guatemalteco.',
-  'Desde su concepcion en 2025, el objetivo principal del proyecto ha sido expandir las barreras entre los generos musicales, con un catalogo de influencias que abarca desde el Punk y el Emo hasta estilos mas actuales como el Metalcore y el Post-hardcore.',
-  'Pese a su reciente inicio, la banda ya cuenta con mas de 10 presentaciones, incluyendo en la Interfer, logro que les abrio puertas en la escena y marco la direccion a seguir, ahora enfocada en crear material propio.'
-];
-
-const members = [
-  'Moises Axpuaca - Vocalista, guitarrista de apoyo',
-  'Allan Chopen - Guitarrista',
-  'Daniel Saban - Guitarrista, voces de apoyo',
-  'Josse Zetina - Bajista, voces de apoyo',
-  'Fernando Trigueros - Baterista, voces de apoyo'
-];
+import { getManagedProducts, getManagedShows } from './bandPublicData';
+import { getPublicBand, getPublicPosts, getPublicEvents } from '../../src/api/bandApi';
 
 function BandPublic() {
+  const { slug } = useParams();
+  const [band, setBand] = useState(null);
   const [products, setProducts] = useState([]);
   const [shows, setShows] = useState([]);
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
-    setProducts(getManagedProducts());
-    setShows(getManagedShows());
-    setPosts(getManagedPosts());
-  }, []);
+    const loadBand = async () => {
+      try {
+        const data = await getPublicBand(slug);
+        setBand(data);
+      } catch (error) {
+        console.error('Error loading band:', error);
+      }
+    };
+
+    if (slug) {
+      loadBand();
+    }
+  }, [slug]);
+
+  useEffect(() => {
+    const loadEvents = async () => {
+      try {
+        const data = await getPublicEvents(slug);
+        // Mapear campos del API al formato esperado
+        const mappedEvents = data.map((event) => ({
+          id: event.id,
+          title: event.nombre,
+          description: event.descripcion,
+          date: new Date(event.fecha).toLocaleDateString('es-ES'),
+          time: event.hora,
+          venue: event.ubicacion,
+          location: event.ubicacion,
+          capacity: event.capacidad,
+          price: event.precioEntrada,
+          status: event.estado,
+          poster: null,
+        }));
+        setShows(mappedEvents);
+      } catch (error) {
+        console.error('Error loading events:', error);
+      }
+    };
+
+    if (slug) {
+      loadEvents();
+    }
+  }, [slug]);
+
+  useEffect(() => {
+    const loadPosts = async () => {
+      try {
+        const data = await getPublicPosts(slug);
+        // Mapear campos del API al formato esperado
+        const mappedPosts = data.map((post) => ({
+          id: post.id,
+          title: post.titulo,
+          excerpt: post.contenido.substring(0, 150) + '...',
+          image: post.imagenUrl,
+          date: new Date(post.fechaPublicacion).toLocaleDateString('es-ES'),
+        }));
+        setPosts(mappedPosts);
+      } catch (error) {
+        console.error('Error loading posts:', error);
+      }
+    };
+
+    if (slug) {
+      loadPosts();
+    }
+  }, [slug]);
 
   return (
     <main className="bp-page">
       <NavBar />
-      <Hero title="Lost In The Ocean" subtitle="Desde Ciudad de Guatemala." image={heroImage} />
-      <About paragraphs={aboutParagraphs} members={members} />
+      <Hero title={band?.nombre} subtitle={band?.descripcion} image={band?.imagenUrl || heroImage} />
+      <About paragraphs={band?.biografia ? band.biografia.split(/\r?\n\r?\n/) : []} />
       <Products products={products} />
-      <Shows shows={shows} />
-      <Posts posts={posts} />
+      <Shows shows={shows} slug={slug} />
+      <Posts posts={posts} slug={slug} />
       <Contact />
       <Newsletter />
       <Footer />

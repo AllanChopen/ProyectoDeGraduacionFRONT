@@ -1,3 +1,4 @@
+import Landing from '../Pages/Landing/Landing';
 import BandPublic from '../Pages/BandPublic/BandPublic';
 import Blog from '../Pages/Blog/Blog';
 import Cart from '../Pages/Cart/Cart';
@@ -16,21 +17,25 @@ import Tickets from '../Pages/Tickets/Tickets';
 function App() {
     return (
         <Routes>
-            <Route path="/" element={<BandPublic />} />
-            <Route path="/tienda" element={<Store />} />
-            <Route path="/tienda/producto/:productId" element={<ProductDetail />} />
-            <Route path="/carrito" element={<Cart />} />
-            <Route path="/shows" element={<Tickets />} />
-            <Route path="/shows/:showId" element={<ShowDetail />} />
-            <Route path="/carrito-tickets" element={<TicketCart />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/:postId" element={<PostDetail />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/dashboard/productos" element={<DashboardProducts />} />
-            <Route path="/dashboard/shows" element={<DashboardShows />} />
-            <Route path="/dashboard/blog" element={<DashboardBlog />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+    <Route path="/" element={<Landing />} />
+
+    {/* Public band */}
+    <Route path="/:slug" element={<BandPublic />} />
+    <Route path="/:slug/store" element={<Store />} />
+    <Route path="/:slug/store/product/:productId" element={<ProductDetail />} />
+    <Route path="/:slug/shows" element={<Tickets />} />
+    <Route path="/:slug/shows/:showId" element={<ShowDetail />} />
+    <Route path="/:slug/blog" element={<Blog />} />
+    <Route path="/:slug/blog/:postId" element={<PostDetail />} />
+
+    {/* Global/dashboard routes */}
+    <Route path="/dashboard" element={<Dashboard />} />
+    <Route path="/dashboard/productos" element={<DashboardProducts />} />
+    <Route path="/dashboard/shows" element={<DashboardShows />} />
+    <Route path="/dashboard/blog" element={<DashboardBlog />} />
+
+    <Route path="*" element={<Navigate to="/" replace />} />
+</Routes>
     );
 }
 

@@ -1,18 +1,48 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import NavBar from '../../Components/NavBar/NavBar';
 import Footer from '../../Components/Footer/Footer';
-import { getManagedShows } from '../BandPublic/bandPublicData';
+import { getPublicEvents } from '../../src/api/bandApi';
 import '../BandPublic/BandPublic.css';
 import '../BandPublic/Components/Shows/Shows.css';
 import './Tickets.css';
 
 function Tickets() {
+	const { slug } = useParams();
 	const [shows, setShows] = useState([]);
+	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		setShows(getManagedShows());
-	}, []);
+		const loadShows = async () => {
+			try {
+				setLoading(true);
+				const data = await getPublicEvents(slug);
+				// Mapear campos del API al formato esperado
+				const mappedEvents = data.map((event) => ({
+					id: event.id,
+					title: event.nombre,
+					description: event.descripcion,
+					date: new Date(event.fecha).toLocaleDateString('es-ES'),
+					time: event.hora,
+					venue: event.ubicacion,
+					location: event.ubicacion,
+					capacity: event.capacidad,
+					price: event.precioEntrada,
+					status: event.estado,
+					poster: null,
+				}));
+				setShows(mappedEvents);
+			} catch (error) {
+				console.error('Error loading events:', error);
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		if (slug) {
+			loadShows();
+		}
+	}, [slug]);
 
 	return (
 		<main className="bp-page tickets-page">
@@ -27,15 +57,18 @@ function Tickets() {
 					</p>
 				</div>
 				<div className="bp-more-wrap">
-					<Link to="/" className="bp-btn bp-btn-ghost">
-						Volver al sitio
-					</Link>
-				</div>
-			</section>
+				<Link to={`/${slug}`} className="bp-btn bp-btn-ghost">
+					Volver al sitio
+				</Link>
+			</div>
+		</section>
 
-			<section className="bp-section" aria-label="Listado completo de shows">
-				<div className="bp-container tickets-grid">
-					{shows.map((show) => (
+		<section className="bp-section" aria-label="Listado completo de shows">
+			<div className="bp-container tickets-grid">
+				{loading ? (
+					<p style={{ gridColumn: '1 / -1', textAlign: 'center' }}>Cargando shows...</p>
+				) : shows.length > 0 ? (
+					shows.map((show) => (
 						<article className="bp-show-card tickets-show-card" key={show.id}>
 							{show.poster ? (
 								<img src={show.poster} alt={show.title} className="bp-show-image" />
@@ -49,13 +82,16 @@ function Tickets() {
 								<p className="bp-meta">{show.date}</p>
 								<div className="bp-show-footer">
 									<small>{show.status}</small>
-									<Link to={`/shows/${show.id}`} className="bp-btn bp-btn-small">
+									<Link to={`/${slug}/shows/${show.id}`} className="bp-btn bp-btn-small">
 										Comprar
 									</Link>
 								</div>
 							</div>
 						</article>
-					))}
+					))
+				) : (
+					<p style={{ gridColumn: '1 / -1', textAlign: 'center' }}>No hay shows disponibles.</p>
+				)}
 				</div>
 			</section>
 

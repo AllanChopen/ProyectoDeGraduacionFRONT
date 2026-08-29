@@ -1,16 +1,59 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import NavBar from '../../Components/NavBar/NavBar';
 import Footer from '../../Components/Footer/Footer';
-import { getShowById } from '../BandPublic/bandPublicData';
+import { getPublicEventDetail } from '../../src/api/bandApi';
 import { useCart } from '../../src/context/CartContext';
 import '../BandPublic/BandPublic.css';
 import './ShowDetail.css';
 
 function ShowDetail() {
-  const { showId } = useParams();
-  const show = getShowById(showId);
+  const { slug, showId } = useParams();
+  const [show, setShow] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const { addTicketItem } = useCart();
+
+  useEffect(() => {
+    const loadShow = async () => {
+      try {
+        setLoading(true);
+        const data = await getPublicEventDetail(slug, showId);
+        // Mapear campos del API
+        const mappedShow = {
+          id: data.id,
+          title: data.nombre,
+          description: data.descripcion,
+          date: new Date(data.fecha).toLocaleDateString('es-ES'),
+          time: data.hora,
+          venue: data.ubicacion,
+          location: data.ubicacion,
+          capacity: data.capacidad,
+          price: data.precioEntrada,
+          status: data.estado,
+          poster: null,
+          ticketTypes: [
+            {
+              id: `show-${data.id}-general`,
+              label: 'General',
+              price: data.precioEntrada,
+              stock: data.capacidad,
+            },
+          ],
+        };
+        setShow(mappedShow);
+      } catch (err) {
+        console.error('Error loading show:', err);
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (slug && showId) {
+      loadShow();
+    }
+  }, [slug, showId]);
 
   const ticketTypes = show?.ticketTypes?.length
     ? show.ticketTypes
@@ -18,8 +61,8 @@ function ShowDetail() {
         {
           id: `show-${show?.id}-general`,
           label: 'General',
-          price: 0,
-          stock: 1
+          price: show?.price ?? 0,
+          stock: show?.capacity ?? 1
         }
       ];
 
@@ -33,7 +76,21 @@ function ShowDetail() {
     return ticketTypes.find((ticket) => ticket.id === selectedTicketId) ?? ticketTypes[0];
   }, [show, selectedTicketId, ticketTypes]);
 
-  if (!show) {
+  if (loading) {
+    return (
+      <main className="bp-page show-detail-page">
+        <NavBar />
+        <section className="bp-section" aria-label="Cargando show">
+          <div className="bp-section-header">
+            <p style={{ textAlign: 'center' }}>Cargando show...</p>
+          </div>
+        </section>
+        <Footer />
+      </main>
+    );
+  }
+
+  if (error || !show) {
     return (
       <main className="bp-page show-detail-page">
         <NavBar />
@@ -44,7 +101,7 @@ function ShowDetail() {
             <p className="show-subtitle">Este show no existe o ya no esta disponible.</p>
           </div>
           <div className="bp-more-wrap">
-            <Link to="/shows" className="bp-btn">
+            <Link to={`/${slug}/shows`} className="bp-btn">
               Volver a shows
             </Link>
           </div>

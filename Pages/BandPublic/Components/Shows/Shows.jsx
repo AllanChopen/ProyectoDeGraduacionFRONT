@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './Shows.css';
 
-function Shows({ shows }) {
+function Shows({ shows, slug }) {
   const containerRef = useRef(null);
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(false);
@@ -76,7 +76,7 @@ function Shows({ shows }) {
                 <p className="bp-meta">{show.date}</p>
                 <div className="bp-show-footer">
                   <small>{show.status}</small>
-                  <Link to={`/shows/${show.id}`} className="bp-btn bp-btn-small">
+                  <Link to={`/${slug}/shows/${show.id}`} className="bp-btn bp-btn-small">
                     Comprar
                   </Link>
                 </div>
@@ -87,7 +87,7 @@ function Shows({ shows }) {
       </div>
 
       <div className="bp-more-wrap">
-        <Link to="/shows" className="bp-btn">
+        <Link to={`/${slug}/shows`} className="bp-btn">
           Mostrar mas shows
         </Link>
       </div>

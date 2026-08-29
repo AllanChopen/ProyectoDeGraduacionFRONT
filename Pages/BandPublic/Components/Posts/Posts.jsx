@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './Posts.css';
 
-function Posts({ posts }) {
+function Posts({ posts, slug }) {
   const containerRef = useRef(null);
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(false);
@@ -74,7 +74,7 @@ function Posts({ posts }) {
                 <p className="bp-meta">{post.excerpt}</p>
                 <div className="bp-show-footer">
                   <small>{post.date}</small>
-                  <Link to={`/blog/${post.id}`} className="bp-btn bp-btn-small">
+                  <Link to={`/${slug}/blog/${post.id}`} className="bp-btn bp-btn-small">
                     Leer
                   </Link>
                 </div>
@@ -85,7 +85,7 @@ function Posts({ posts }) {
       </div>
 
       <div className="bp-more-wrap">
-        <Link to="/blog" className="bp-btn">
+        <Link to={`/${slug}/blog`} className="bp-btn">
           Mostrar mas
         </Link>
       </div>

@@ -1,6 +1,8 @@
 .bp-post-card {
   min-width: 260px;
   max-width: 320px;
+  width: 320px;
+  height: 440px;
   flex: 0 0 auto;
   scroll-snap-align: start;
   background: var(--bp-surface-alt);
@@ -13,8 +15,12 @@
 
 .bp-post-image {
   width: 100%;
-  height: 160px;
+  height: 260px;
+  min-height: 260px;
   object-fit: cover;
+  object-position: center;
+  display: block;
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .bp-post-card .bp-card-content {

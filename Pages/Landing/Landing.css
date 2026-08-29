@@ -1,0 +1,33 @@
+.landing-page {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.landing-wip {
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.wip-banner {
+  background: var(--surface);
+  border: 2px solid var(--brand-accent);
+  border-radius: 8px;
+  padding: 2rem;
+  margin-top: 2rem;
+}
+
+.wip-badge {
+  display: inline-block;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--brand-accent);
+  margin-bottom: 1rem;
+}
+
+.wip-banner p {
+  color: var(--text-faint);
+  margin: 1rem 0 0 0;
+}
+

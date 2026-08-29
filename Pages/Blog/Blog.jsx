@@ -1,18 +1,42 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import NavBar from '../../Components/NavBar/NavBar';
 import Footer from '../../Components/Footer/Footer';
-import { getManagedPosts } from '../BandPublic/bandPublicData';
+import { getPublicPosts } from '../../src/api/bandApi';
 import '../BandPublic/BandPublic.css';
 import '../BandPublic/Components/Posts/Posts.css';
 import './Blog.css';
 
 function Blog() {
+  const { slug } = useParams();
   const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setPosts(getManagedPosts());
-  }, []);
+    const loadPosts = async () => {
+      try {
+        setLoading(true);
+        const data = await getPublicPosts(slug);
+        // Mapear campos del API al formato esperado
+        const mappedPosts = data.map((post) => ({
+          id: post.id,
+          title: post.titulo,
+          excerpt: post.contenido.substring(0, 150) + '...',
+          image: post.imagenUrl,
+          date: new Date(post.fechaPublicacion).toLocaleDateString('es-ES'),
+        }));
+        setPosts(mappedPosts);
+      } catch (error) {
+        console.error('Error loading posts:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (slug) {
+      loadPosts();
+    }
+  }, [slug]);
 
   return (
     <main className="bp-page blog-page">
@@ -27,7 +51,7 @@ function Blog() {
           </p>
         </div>
         <div className="bp-more-wrap">
-          <Link to="/" className="bp-btn bp-btn-ghost">
+          <Link to={`/${slug}`} className="bp-btn bp-btn-ghost">
             Volver al sitio
           </Link>
         </div>
@@ -35,7 +59,10 @@ function Blog() {
 
       <section className="bp-section" aria-label="Listado completo de publicaciones">
         <div className="bp-container blog-grid">
-          {posts.map((post) => (
+          {loading ? (
+            <p style={{ gridColumn: '1 / -1', textAlign: 'center' }}>Cargando posts...</p>
+          ) : posts.length > 0 ? (
+            posts.map((post) => (
             <article className="bp-post-card blog-post-card" key={post.id}>
               {post.image ? (
                 <img src={post.image} alt={post.title} className="bp-post-image" />
@@ -47,13 +74,16 @@ function Blog() {
                 <p className="bp-meta">{post.excerpt}</p>
                 <div className="bp-show-footer">
                   <small>{post.date}</small>
-                  <Link to={`/blog/${post.id}`} className="bp-btn bp-btn-small">
+                  <Link to={`/${slug}/blog/${post.id}`} className="bp-btn bp-btn-small">
                     Leer
                   </Link>
                 </div>
               </div>
             </article>
-          ))}
+            ))
+          ) : (
+            <p style={{ gridColumn: '1 / -1', textAlign: 'center' }}>No hay posts disponibles.</p>
+          )}
         </div>
       </section>
 
