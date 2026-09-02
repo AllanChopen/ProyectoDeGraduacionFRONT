@@ -19,3 +19,11 @@ export const getPublicEvents = async (slug) => {
 export const getPublicEventDetail = async (slug, id) => {
   return apiClient(`/api/Eventos/public/${slug}/${id}`);
 };
+
+export const getPublicProducts = async (slug) => {
+  return apiClient(`/api/Productos/public/${slug}`);
+};
+
+export const getPublicProductDetail = async (slug, id) => {
+  return apiClient(`/api/Productos/public/${slug}/${id}`);
+};

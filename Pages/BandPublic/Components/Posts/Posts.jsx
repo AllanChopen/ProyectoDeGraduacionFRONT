@@ -72,12 +72,10 @@ function Posts({ posts, slug }) {
               <div className="bp-card-content">
                 <strong>{post.title}</strong>
                 <p className="bp-meta">{post.excerpt}</p>
-                <div className="bp-show-footer">
-                  <small>{post.date}</small>
-                  <Link to={`/${slug}/blog/${post.id}`} className="bp-btn bp-btn-small">
-                    Leer
-                  </Link>
-                </div>
+                <p className="bp-meta">{post.date}</p>
+                <Link to={`/${slug}/blog/${post.id}`} className="bp-btn bp-btn-small bp-card-cta">
+                  Ver
+                </Link>
               </div>
             </article>
           ))}

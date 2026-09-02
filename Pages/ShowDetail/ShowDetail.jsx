@@ -21,7 +21,7 @@ function ShowDetail() {
         const data = await getPublicEventDetail(slug, showId);
         // Mapear campos del API
         const mappedShow = {
-          id: data.id,
+          id: data.id ?? data.uuid ?? showId,
           title: data.nombre,
           description: data.descripcion,
           date: new Date(data.fecha).toLocaleDateString('es-ES'),
@@ -34,7 +34,7 @@ function ShowDetail() {
           poster: null,
           ticketTypes: [
             {
-              id: `show-${data.id}-general`,
+              id: `show-${data.id ?? data.uuid ?? showId}-general`,
               label: 'General',
               price: data.precioEntrada,
               stock: data.capacidad,
@@ -210,7 +210,7 @@ function ShowDetail() {
             <Link to="/carrito-tickets" className="bp-btn">
               Ver carrito tickets
             </Link>
-            <Link to="/shows" className="bp-btn bp-btn-ghost">
+            <Link to={`/${slug}/shows`} className="bp-btn bp-btn-ghost">
               Ver mas shows
             </Link>
           </div>

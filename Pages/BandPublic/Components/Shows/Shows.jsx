@@ -74,12 +74,10 @@ function Shows({ shows, slug }) {
                 <p className="bp-meta">{show.venue}</p>
                 <p className="bp-meta">{show.location}</p>
                 <p className="bp-meta">{show.date}</p>
-                <div className="bp-show-footer">
-                  <small>{show.status}</small>
-                  <Link to={`/${slug}/shows/${show.id}`} className="bp-btn bp-btn-small">
-                    Comprar
-                  </Link>
-                </div>
+                <p className="bp-meta">{show.status}</p>
+                <Link to={`/${slug}/shows/${show.id}`} className="bp-btn bp-btn-small bp-card-cta">
+                  Ver
+                </Link>
               </div>
             </article>
           ))}

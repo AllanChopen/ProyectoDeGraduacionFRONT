@@ -19,7 +19,7 @@ function PostDetail() {
         const data = await getPublicPostDetail(slug, postId);
         // Mapear campos del API
         const mappedPost = {
-        id: data.id,
+        id: data.id ?? data.uuid ?? postId,
         title: data.titulo,
         content: data.contenido.split(/\r?\n\r?\n/),
         image: data.imagenUrl,
@@ -94,7 +94,6 @@ function PostDetail() {
             {post.title}
           </strong>
           <p className="post-date" style={{ marginBottom: '1rem' }}>{post.date}</p>
-          <p className="post-lead">{post.excerpt}</p>
           {post.content?.map((paragraph, index) => (
             <p className="post-paragraph" key={index}>
               {paragraph}

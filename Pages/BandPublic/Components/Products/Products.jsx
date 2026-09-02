@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './Products.css';
 
-function Products({ products }) {
+function Products({ products, slug }) {
   const containerRef = useRef(null);
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(false);
@@ -63,7 +63,7 @@ function Products({ products }) {
 
         <div className="bp-carousel" ref={containerRef}>
           {products.map((product) => (
-            <article className="bp-product-card" key={product.id}>
+            <article className="bp-product-card" key={product.id ?? product.uuid}>
               {product.image ? (
                 <img src={product.image} alt={product.name} className="bp-product-image" />
               ) : (
@@ -73,9 +73,15 @@ function Products({ products }) {
                 <strong>{product.name}</strong>
                 <p className="bp-meta">{product.type}</p>
                 <p className="bp-price">Q{product.price.toFixed(2)}</p>
-                <Link to={`/tienda/producto/${product.id}`} className="bp-btn bp-btn-small">
-                  Ver
-                </Link>
+                {product.id || product.uuid ? (
+                  <Link to={`/${slug}/store/product/${product.id ?? product.uuid}`} className="bp-btn bp-btn-small">
+                    Ver
+                  </Link>
+                ) : (
+                  <button type="button" className="bp-btn bp-btn-small" disabled>
+                    No disponible
+                  </button>
+                )}
               </div>
             </article>
           ))}
@@ -83,7 +89,7 @@ function Products({ products }) {
       </div>
 
       <div className="bp-more-wrap">
-        <Link to="/tienda" className="bp-btn">
+        <Link to={`/${slug}/store`} className="bp-btn">
           Ver tienda completa
         </Link>
       </div>

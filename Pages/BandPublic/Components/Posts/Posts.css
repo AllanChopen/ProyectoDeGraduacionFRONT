@@ -1,8 +1,6 @@
 .bp-post-card {
-  min-width: 260px;
-  max-width: 320px;
-  width: 320px;
-  height: 440px;
+  min-width: 180px;
+  max-width: 220px;
   flex: 0 0 auto;
   scroll-snap-align: start;
   background: var(--bp-surface-alt);
@@ -11,22 +9,34 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  padding: 0.6rem;
+}
+
+.bp-post-image,
+.bp-post-card .bp-image-placeholder {
+  width: 100%;
+  aspect-ratio: 1 / 1;
 }
 
 .bp-post-image {
-  width: 100%;
-  height: 260px;
-  min-height: 260px;
   object-fit: cover;
-  object-position: center;
-  display: block;
-  background: rgba(255, 255, 255, 0.04);
+}
+
+.bp-post-card .bp-image-placeholder {
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(90deg, var(--bp-text-faint), #eee);
 }
 
 .bp-post-card .bp-card-content {
-  padding: 1rem;
+  padding: 0.1rem;
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  gap: 0.45rem;
+}
+
+.bp-post-card .bp-card-cta {
+  margin-top: auto;
+  align-self: flex-start;
 }

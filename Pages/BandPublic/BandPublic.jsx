@@ -11,8 +11,18 @@ import Posts from './Components/Posts/Posts';
 import Contact from './Components/Contact/Contact';
 import Newsletter from './Components/Newsletter/Newsletter';
 import heroImage from '../../src/assets/hero.png';
-import { getManagedProducts, getManagedShows } from './bandPublicData';
-import { getPublicBand, getPublicPosts, getPublicEvents } from '../../src/api/bandApi';
+import { getPublicBand, getPublicPosts, getPublicEvents, getPublicProducts } from '../../src/api/bandApi';
+
+function getNumericProductId(product) {
+  const candidates = [product?.id, product?.productoId, product?.idProducto, product?.productId];
+  for (const candidate of candidates) {
+    const value = Number(candidate);
+    if (Number.isInteger(value) && value > 0) {
+      return value;
+    }
+  }
+  return null;
+}
 
 function BandPublic() {
   const { slug } = useParams();
@@ -37,12 +47,45 @@ function BandPublic() {
   }, [slug]);
 
   useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const data = await getPublicProducts(slug);
+        const mappedProducts = data.map((product) => ({
+          id: getNumericProductId(product),
+          uuid: product.uuid,
+          name: product.nombre,
+          description: product.descripcion,
+          price: Number(product.precio ?? 0),
+          available: Boolean(product.disponible),
+          stock: Number(product.stock ?? 0),
+          type: 'Merch oficial',
+          image: product.imagenUrl ?? null,
+          variants: (product.variaciones ?? []).map((variant) => ({
+            id: variant.id ?? variant.uuid,
+            label: variant.nombre || variant.atributos || 'Variacion',
+            price: Number(variant.precio ?? 0),
+            stock: Number(variant.stock ?? 0),
+            available: Boolean(variant.disponible),
+          }))
+        }));
+        setProducts(mappedProducts);
+      } catch (error) {
+        console.error('Error loading products:', error);
+      }
+    };
+
+    if (slug) {
+      loadProducts();
+    }
+  }, [slug]);
+
+  useEffect(() => {
     const loadEvents = async () => {
       try {
         const data = await getPublicEvents(slug);
         // Mapear campos del API al formato esperado
         const mappedEvents = data.map((event) => ({
-          id: event.id,
+          id: event.id ?? event.uuid,
           title: event.nombre,
           description: event.descripcion,
           date: new Date(event.fecha).toLocaleDateString('es-ES'),
@@ -71,7 +114,7 @@ function BandPublic() {
         const data = await getPublicPosts(slug);
         // Mapear campos del API al formato esperado
         const mappedPosts = data.map((post) => ({
-          id: post.id,
+          id: post.id ?? post.uuid,
           title: post.titulo,
           excerpt: post.contenido.substring(0, 150) + '...',
           image: post.imagenUrl,
@@ -93,7 +136,7 @@ function BandPublic() {
       <NavBar />
       <Hero title={band?.nombre} subtitle={band?.descripcion} image={band?.imagenUrl || heroImage} />
       <About paragraphs={band?.biografia ? band.biografia.split(/\r?\n\r?\n/) : []} />
-      <Products products={products} />
+      <Products products={products} slug={slug} />
       <Shows shows={shows} slug={slug} />
       <Posts posts={posts} slug={slug} />
       <Contact />

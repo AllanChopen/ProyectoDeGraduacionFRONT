@@ -19,7 +19,7 @@ function Blog() {
         const data = await getPublicPosts(slug);
         // Mapear campos del API al formato esperado
         const mappedPosts = data.map((post) => ({
-          id: post.id,
+          id: post.id ?? post.uuid,
           title: post.titulo,
           excerpt: post.contenido.substring(0, 150) + '...',
           image: post.imagenUrl,
@@ -72,12 +72,10 @@ function Blog() {
               <div className="bp-card-content">
                 <strong>{post.title}</strong>
                 <p className="bp-meta">{post.excerpt}</p>
-                <div className="bp-show-footer">
-                  <small>{post.date}</small>
-                  <Link to={`/${slug}/blog/${post.id}`} className="bp-btn bp-btn-small">
-                    Leer
-                  </Link>
-                </div>
+                <p className="bp-meta">{post.date}</p>
+                <Link to={`/${slug}/blog/${post.id}`} className="bp-btn bp-btn-small bp-card-cta">
+                  Ver
+                </Link>
               </div>
             </article>
             ))

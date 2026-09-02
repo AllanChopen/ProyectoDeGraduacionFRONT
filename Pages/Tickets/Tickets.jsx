@@ -19,7 +19,7 @@ function Tickets() {
 				const data = await getPublicEvents(slug);
 				// Mapear campos del API al formato esperado
 				const mappedEvents = data.map((event) => ({
-					id: event.id,
+					id: event.id ?? event.uuid,
 					title: event.nombre,
 					description: event.descripcion,
 					date: new Date(event.fecha).toLocaleDateString('es-ES'),
@@ -80,12 +80,10 @@ function Tickets() {
 								<p className="bp-meta">{show.venue}</p>
 								<p className="bp-meta">{show.location}</p>
 								<p className="bp-meta">{show.date}</p>
-								<div className="bp-show-footer">
-									<small>{show.status}</small>
-									<Link to={`/${slug}/shows/${show.id}`} className="bp-btn bp-btn-small">
-										Comprar
-									</Link>
-								</div>
+								<p className="bp-meta">{show.status}</p>
+								<Link to={`/${slug}/shows/${show.id}`} className="bp-btn bp-btn-small bp-card-cta">
+									Ver
+								</Link>
 							</div>
 						</article>
 					))

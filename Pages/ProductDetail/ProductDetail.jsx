@@ -1,16 +1,74 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import NavBar from '../../Components/NavBar/NavBar';
 import Footer from '../../Components/Footer/Footer';
-import { getProductById } from '../BandPublic/bandPublicData';
+import { getPublicProductDetail, getPublicProducts } from '../../src/api/bandApi';
 import { useCart } from '../../src/context/CartContext';
 import '../BandPublic/BandPublic.css';
 import './ProductDetail.css';
 
+function mapPublicProduct(product, fallbackId = null) {
+  return {
+    id: Number(product.id ?? fallbackId ?? 0) || null,
+    uuid: product.uuid,
+    name: product.nombre,
+    description: product.descripcion,
+    price: Number(product.precio ?? 0),
+    available: Boolean(product.disponible),
+    stock: Number(product.stock ?? 0),
+    type: 'Merch oficial',
+    image: product.imagenUrl ?? null,
+    variants: (product.variaciones ?? []).map((variant) => ({
+      id: variant.id ?? variant.uuid,
+      label: variant.nombre || variant.atributos || 'Variacion',
+      price: Number(variant.precio ?? 0),
+      stock: Number(variant.stock ?? 0),
+      available: Boolean(variant.disponible),
+    }))
+  };
+}
+
 function ProductDetail() {
-  const { productId } = useParams();
-  const product = getProductById(productId);
+  const { slug, productId } = useParams();
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
   const { addMerchItem } = useCart();
+
+  useEffect(() => {
+    const loadProduct = async () => {
+      setLoading(true);
+      setNotFound(false);
+      try {
+        const numericProductId = Number(productId);
+        if (Number.isInteger(numericProductId) && numericProductId > 0) {
+          const data = await getPublicProductDetail(slug, numericProductId);
+          setProduct(mapPublicProduct(data, numericProductId));
+          return;
+        }
+
+        const list = await getPublicProducts(slug);
+        const selected = list.find((item) => item.uuid === productId);
+        if (!selected) {
+          setProduct(null);
+          setNotFound(true);
+          return;
+        }
+
+        setProduct(mapPublicProduct(selected));
+      } catch (error) {
+        console.error('Error loading product detail:', error);
+        setProduct(null);
+        setNotFound(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (slug && productId) {
+      loadProduct();
+    }
+  }, [slug, productId]);
 
   const variants = product?.variants?.length
     ? product.variants
@@ -28,12 +86,33 @@ function ProductDetail() {
   const [quantity, setQuantity] = useState(1);
   const [feedback, setFeedback] = useState('');
 
+  useEffect(() => {
+    setSelectedVariantId(defaultVariant?.id ?? '');
+    setQuantity(1);
+    setFeedback('');
+  }, [defaultVariant?.id]);
+
   const selectedVariant = useMemo(() => {
     if (!product) return null;
     return variants.find((variant) => variant.id === selectedVariantId) ?? variants[0];
   }, [product, selectedVariantId, variants]);
 
-  if (!product) {
+  if (loading) {
+    return (
+      <main className="bp-page product-page">
+        <NavBar />
+        <section className="bp-section" aria-label="Cargando producto">
+          <div className="bp-section-header">
+            <h1 className="bp-section-title">Cargando producto...</h1>
+            <div className="bp-divider" />
+          </div>
+        </section>
+        <Footer />
+      </main>
+    );
+  }
+
+  if (!product || notFound) {
     return (
       <main className="bp-page product-page">
         <NavBar />
@@ -44,7 +123,7 @@ function ProductDetail() {
             <p className="product-subtitle">Este producto no existe o fue removido del catalogo.</p>
           </div>
           <div className="bp-more-wrap">
-            <Link to="/tienda" className="bp-btn">
+            <Link to={`/${slug}/store`} className="bp-btn">
               Volver a la tienda
             </Link>
           </div>
@@ -56,9 +135,10 @@ function ProductDetail() {
 
   const handleAddToCart = () => {
     if (!selectedVariant) return;
+    if ((selectedVariant.stock ?? 0) < 1 || selectedVariant.available === false) return;
 
     addMerchItem({
-      productId: product.id,
+      productId: product.id ?? product.uuid,
       name: product.name,
       variantId: selectedVariant.id,
       variantLabel: selectedVariant.label,
@@ -96,11 +176,11 @@ function ProductDetail() {
             <select
               id="variant"
               className="bp-field product-select"
-              value={selectedVariant?.id ?? ''}
+              value={selectedVariantId}
               onChange={(event) => setSelectedVariantId(event.target.value)}
             >
               {variants.map((variant) => (
-                <option key={variant.id} value={variant.id}>
+                <option key={variant.id} value={variant.id} disabled={variant.available === false || variant.stock < 1}>
                   {variant.label} - Q{variant.price.toFixed(2)}
                 </option>
               ))}
@@ -143,7 +223,7 @@ function ProductDetail() {
             <button type="button" className="bp-btn" onClick={handleAddToCart}>
               Anadir al carrito
             </button>
-            <Link to="/tienda" className="bp-btn bp-btn-ghost">
+            <Link to={`/${slug}/store`} className="bp-btn bp-btn-ghost">
               Seguir comprando
             </Link>
           </div>
