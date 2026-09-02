@@ -1,13 +1,22 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../src/context/CartContext';
+import { useAuth } from '../../src/context/AuthContext';
 import './Navbar.css';
 
 function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
   const { merchTotalItems } = useCart();
+  const { isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
 
   const closeMenu = () => setIsOpen(false);
+
+  const handleLogout = () => {
+    logout();
+    closeMenu();
+    navigate('/login');
+  };
 
   return (
     <header className="site-header">
@@ -54,6 +63,17 @@ function NavBar() {
             <Link to="/dashboard" onClick={closeMenu}>
               Dashboard
             </Link>
+          </li>
+          <li>
+            {isAuthenticated ? (
+              <button type="button" className="nav-logout" onClick={handleLogout}>
+                Cerrar sesion
+              </button>
+            ) : (
+              <Link to="/login" onClick={closeMenu}>
+                Login
+              </Link>
+            )}
           </li>
         </ul>
 

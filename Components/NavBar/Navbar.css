@@ -83,6 +83,23 @@
   width: 100%;
 }
 
+.nav-logout {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #c9bfc6;
+  font-size: 0.86rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  padding: 0.2rem 0;
+  font-family: inherit;
+}
+
+.nav-logout:hover,
+.nav-logout:focus {
+  color: #fff;
+}
+
 .nav-social {
   display: none;
 }

@@ -6,6 +6,7 @@ import DashboardBlog from '../Pages/Dashboard/DashboardBlog';
 import Dashboard from '../Pages/Dashboard/Dashboard';
 import DashboardProducts from '../Pages/Dashboard/DashboardProducts';
 import DashboardShows from '../Pages/Dashboard/DashboardShows';
+import Login from '../Pages/Login/Login';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import PostDetail from '../Pages/PostDetail/PostDetail';
 import ProductDetail from '../Pages/ProductDetail/ProductDetail';
@@ -13,11 +14,13 @@ import ShowDetail from '../Pages/ShowDetail/ShowDetail';
 import Store from '../Pages/Store/Store';
 import TicketCart from '../Pages/TicketCart/TicketCart';
 import Tickets from '../Pages/Tickets/Tickets';
+import ProtectedRoute from '../Components/ProtectedRoute/ProtectedRoute';
 
 function App() {
     return (
         <Routes>
     <Route path="/" element={<Landing />} />
+    <Route path="/login" element={<Login />} />
 
     {/* Public band */}
     <Route path="/:slug" element={<BandPublic />} />
@@ -29,10 +32,10 @@ function App() {
     <Route path="/:slug/blog/:postId" element={<PostDetail />} />
 
     {/* Global/dashboard routes */}
-    <Route path="/dashboard" element={<Dashboard />} />
-    <Route path="/dashboard/productos" element={<DashboardProducts />} />
-    <Route path="/dashboard/shows" element={<DashboardShows />} />
-    <Route path="/dashboard/blog" element={<DashboardBlog />} />
+    <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+    <Route path="/dashboard/productos" element={<ProtectedRoute><DashboardProducts /></ProtectedRoute>} />
+    <Route path="/dashboard/shows" element={<ProtectedRoute><DashboardShows /></ProtectedRoute>} />
+    <Route path="/dashboard/blog" element={<ProtectedRoute><DashboardBlog /></ProtectedRoute>} />
 
     <Route path="*" element={<Navigate to="/" replace />} />
 </Routes>
