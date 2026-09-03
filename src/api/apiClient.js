@@ -3,11 +3,12 @@ const TOKEN_STORAGE_KEY = 'lito_auth_token';
 
 export const apiClient = async (endpoint, options = {}) => {
   const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+  const isFormDataBody = typeof FormData !== 'undefined' && options.body instanceof FormData;
 
   const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     headers: {
-      'Content-Type': 'application/json',
+      ...(isFormDataBody ? {} : { 'Content-Type': 'application/json' }),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },
@@ -16,8 +17,14 @@ export const apiClient = async (endpoint, options = {}) => {
   if (!response.ok) {
     let message = `API Error: ${response.status}`;
     try {
-      const errorBody = await response.json();
-      message = errorBody.message || errorBody.title || message;
+      const contentType = response.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        const errorBody = await response.json();
+        message = errorBody.message || errorBody.title || message;
+      } else {
+        const errorText = await response.text();
+        message = errorText || message;
+      }
     } catch {
       // response had no JSON body
     }
@@ -28,5 +35,10 @@ export const apiClient = async (endpoint, options = {}) => {
     return null;
   }
 
-  return response.json();
+  const contentType = response.headers.get('content-type') || '';
+  if (contentType.includes('application/json')) {
+    return response.json();
+  }
+
+  return response.text();
 };

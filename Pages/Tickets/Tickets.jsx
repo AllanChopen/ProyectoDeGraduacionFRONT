@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import NavBar from '../../Components/NavBar/NavBar';
 import Footer from '../../Components/Footer/Footer';
-import { getPublicEvents } from '../../src/api/bandApi';
+import { getPublicEvents, mapEventoToCard, sortEventosForDisplay } from '../../src/api/eventosApi';
 import '../BandPublic/BandPublic.css';
 import '../BandPublic/Components/Shows/Shows.css';
 import './Tickets.css';
@@ -17,20 +17,7 @@ function Tickets() {
 			try {
 				setLoading(true);
 				const data = await getPublicEvents(slug);
-				// Mapear campos del API al formato esperado
-				const mappedEvents = data.map((event) => ({
-					id: event.id ?? event.uuid,
-					title: event.nombre,
-					description: event.descripcion,
-					date: new Date(event.fecha).toLocaleDateString('es-ES'),
-					time: event.hora,
-					venue: event.ubicacion,
-					location: event.ubicacion,
-					capacity: event.capacidad,
-					price: event.precioEntrada,
-					status: event.estado,
-					poster: null,
-				}));
+				const mappedEvents = sortEventosForDisplay(data).map(mapEventoToCard);
 				setShows(mappedEvents);
 			} catch (error) {
 				console.error('Error loading events:', error);

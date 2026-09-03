@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import NavBar from '../../Components/NavBar/NavBar';
 import Footer from '../../Components/Footer/Footer';
-import { getPublicPostDetail } from '../../src/api/bandApi';
+import {
+  getPublicPostDetail,
+  mapPublicacionToDetail
+} from '../../src/api/publicacionesApi';
 import '../BandPublic/BandPublic.css';
 import './PostDetail.css';
 
@@ -17,14 +20,7 @@ function PostDetail() {
       try {
         setLoading(true);
         const data = await getPublicPostDetail(slug, postId);
-        // Mapear campos del API
-        const mappedPost = {
-        id: data.id ?? data.uuid ?? postId,
-        title: data.titulo,
-        content: data.contenido.split(/\r?\n\r?\n/),
-        image: data.imagenUrl,
-        date: new Date(data.fechaPublicacion).toLocaleDateString('es-ES'),
-      };
+        const mappedPost = mapPublicacionToDetail(data, postId);
         setPost(mappedPost);
       } catch (err) {
         console.error('Error loading post:', err);

@@ -2,21 +2,10 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import NavBar from '../../Components/NavBar/NavBar';
 import Footer from '../../Components/Footer/Footer';
-import { getPublicProducts } from '../../src/api/bandApi';
+import { getPublicProducts, mapProductoToCard } from '../../src/api/productosApi';
 import '../BandPublic/BandPublic.css';
 import '../BandPublic/Components/Products/Products.css';
 import './store.css';
-
-function getNumericProductId(product) {
-	const candidates = [product?.id, product?.productoId, product?.idProducto, product?.productId];
-	for (const candidate of candidates) {
-		const value = Number(candidate);
-		if (Number.isInteger(value) && value > 0) {
-			return value;
-		}
-	}
-	return null;
-}
 
 function Store() {
 	const { slug } = useParams();
@@ -26,17 +15,7 @@ function Store() {
 		const loadProducts = async () => {
 			try {
 				const data = await getPublicProducts(slug);
-				const mappedProducts = data.map((product) => ({
-					id: getNumericProductId(product),
-					uuid: product.uuid,
-					name: product.nombre,
-					description: product.descripcion,
-					price: Number(product.precio ?? 0),
-					available: Boolean(product.disponible),
-					stock: Number(product.stock ?? 0),
-					type: 'Merch oficial',
-					image: product.imagenUrl ?? null,
-				}));
+				const mappedProducts = data.map((product) => mapProductoToCard(product));
 				setProducts(mappedProducts);
 			} catch (error) {
 				console.error('Error loading products:', error);

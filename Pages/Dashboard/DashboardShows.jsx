@@ -1,96 +1,181 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import Footer from '../../Components/Footer/Footer';
 import NavBar from '../../Components/NavBar/NavBar';
+import { useAuth } from '../../src/context/AuthContext';
 import {
-  getManagedShows,
-  saveManagedShows
-} from '../BandPublic/bandPublicData';
+  createDashboardEvent,
+  deleteDashboardEvent,
+  getDashboardEvents,
+  updateDashboardEvent
+} from '../../src/api/eventosApi';
 import '../BandPublic/BandPublic.css';
 import './ManageContent.css';
 
+function formatDateLabel(value) {
+  if (!value) return 'Sin fecha';
+  return new Date(value).toLocaleDateString('es-ES');
+}
+
+function formatTimeLabel(value) {
+  if (!value) return 'Sin hora';
+  const match = String(value).match(/^(\d{2}:\d{2})/);
+  return match ? match[1] : value;
+}
+
+function toDateInputValue(value) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+function mapEventToItem(event) {
+  return {
+    id: event.id,
+    title: event.nombre || 'Sin titulo',
+    venue: event.ubicacion || 'Sin ubicacion',
+    location: event.ubicacion || 'Sin ubicacion',
+    mapsUrl: event.ubicacionUrl || '',
+    date: event.fecha || '',
+    time: event.hora || '',
+    status: event.estado || 'Sin estado',
+    description: event.descripcion || '',
+    image: event.imagenUrl || '',
+    capacity: Number(event.capacidad ?? 0),
+    ticketPrice: Number(event.precioEntrada ?? 0)
+  };
+}
+
 function DashboardShows() {
+  const { bandaId } = useAuth();
   const [items, setItems] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [title, setTitle] = useState('');
-  const [venue, setVenue] = useState('');
   const [location, setLocation] = useState('');
+  const [locationUrl, setLocationUrl] = useState('');
   const [date, setDate] = useState('');
-  const [statusLabel, setStatusLabel] = useState('Boletos disponibles');
+  const [time, setTime] = useState('');
+  const [statusLabel, setStatusLabel] = useState('programado');
   const [description, setDescription] = useState('');
-  const [image, setImage] = useState('');
+  const [imageFile, setImageFile] = useState(null);
+  const [capacity, setCapacity] = useState('');
   const [ticketPrice, setTicketPrice] = useState('');
   const [status, setStatus] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const loadItems = async () => {
+    setIsLoading(true);
+    try {
+      const data = await getDashboardEvents();
+      const mapped = data
+        .map(mapEventToItem)
+        .sort((a, b) => {
+          const dateA = new Date(a.date).getTime() || 0;
+          const dateB = new Date(b.date).getTime() || 0;
+          return dateB - dateA;
+        });
+      setItems(mapped);
+      setStatus('');
+    } catch (error) {
+      setStatus(error.message || 'No se pudieron cargar los shows.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    setItems(getManagedShows());
+    loadItems();
   }, []);
 
   const resetForm = () => {
     setEditingId(null);
     setTitle('');
-    setVenue('');
     setLocation('');
+    setLocationUrl('');
     setDate('');
-    setStatusLabel('Boletos disponibles');
+    setTime('');
+    setStatusLabel('programado');
     setDescription('');
-    setImage('');
+    setImageFile(null);
+    setCapacity('');
     setTicketPrice('');
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    const parsedPrice = Number(ticketPrice) || 0;
 
-    const entry = {
-      id: editingId ?? Date.now(),
-      title,
-      venue,
-      location,
-      date,
-      status: statusLabel,
-      description,
-      poster: image,
-      link: '#',
-      ticketTypes: [
-        {
-          id: `${editingId ?? Date.now()}-general`,
-          label: 'General',
-          price: parsedPrice,
-          stock: 120
-        }
-      ]
+    if (!bandaId) {
+      setStatus('No se encontro el identificador de la banda en la sesion.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setStatus('');
+
+    const payload = {
+      bandaId: Number(bandaId),
+      nombre: title,
+      descripcion: description,
+      fecha: date ? new Date(`${date}T00:00:00`).toISOString() : new Date().toISOString(),
+      hora: time ? `${time}:00` : '00:00:00',
+      ubicacion: location,
+      ubicacionUrl: locationUrl,
+      capacidad: Number(capacity) || 0,
+      precioEntrada: Number(ticketPrice) || 0,
+      estado: statusLabel,
+      imagenFile: imageFile || undefined,
     };
 
-    const next = editingId
-      ? items.map((item) => (item.id === editingId ? entry : item))
-      : [entry, ...items];
+    try {
+      if (editingId) {
+        await updateDashboardEvent(editingId, payload);
+        setStatus('Show actualizado.');
+      } else {
+        await createDashboardEvent(payload);
+        setStatus('Show agregado.');
+      }
 
-    setItems(next);
-    saveManagedShows(next);
-    setStatus(editingId ? 'Show actualizado.' : 'Show agregado.');
-    resetForm();
+      await loadItems();
+      resetForm();
+    } catch (error) {
+      setStatus(error.message || 'No se pudo guardar el show.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const startEdit = (item) => {
     setEditingId(item.id);
     setTitle(item.title ?? '');
-    setVenue(item.venue ?? '');
     setLocation(item.location ?? '');
-    setDate(item.date ?? '');
-    setStatusLabel(item.status ?? 'Boletos disponibles');
+    setLocationUrl(item.mapsUrl ?? '');
+    setDate(toDateInputValue(item.date));
+    setTime(formatTimeLabel(item.time));
+    setStatusLabel(item.status ?? 'programado');
     setDescription(item.description ?? '');
-    setImage(item.poster ?? '');
-    setTicketPrice(String(item.ticketTypes?.[0]?.price ?? 0));
+    setImageFile(null);
+    setCapacity(String(item.capacity ?? 0));
+    setTicketPrice(String(item.ticketPrice ?? 0));
     setStatus('Editando show.');
   };
 
-  const handleDelete = (id) => {
-    const next = items.filter((item) => item.id !== id);
-    setItems(next);
-    saveManagedShows(next);
-    if (editingId === id) resetForm();
-    setStatus('Show eliminado.');
+  const handleDelete = async (id) => {
+    const shouldDelete = window.confirm('Estas seguro de eliminar este show?');
+    if (!shouldDelete) {
+      return;
+    }
+
+    try {
+      await deleteDashboardEvent(id);
+      const next = items.filter((item) => item.id !== id);
+      setItems(next);
+      if (editingId === id) resetForm();
+      setStatus('Show eliminado.');
+    } catch (error) {
+      setStatus(error.message || 'No se pudo eliminar el show.');
+    }
   };
 
   return (
@@ -102,7 +187,7 @@ function DashboardShows() {
           <h1 className="bp-section-title">Gestionar Shows</h1>
           <div className="bp-divider" />
           <p className="manage-subtitle">
-            Administra fechas, descripcion e imagen. Cada show mantiene su boton para comprar tickets.
+            Administra fechas, hora, ubicacion, capacidad, precio, estado e imagen desde el endpoint de eventos.
           </p>
         </div>
 
@@ -111,10 +196,25 @@ function DashboardShows() {
             <h2 className="bp-about-title">{editingId ? 'Editar show' : 'Nuevo show'}</h2>
             <form className="manage-form" onSubmit={handleSubmit}>
               <input className="bp-field" placeholder="Titulo" value={title} onChange={(e) => setTitle(e.target.value)} required />
-              <input className="bp-field" placeholder="Venue" value={venue} onChange={(e) => setVenue(e.target.value)} required />
-              <input className="bp-field" placeholder="Ciudad / ubicacion" value={location} onChange={(e) => setLocation(e.target.value)} required />
-              <input className="bp-field" placeholder="Fecha" value={date} onChange={(e) => setDate(e.target.value)} required />
-              <input className="bp-field" placeholder="Estado" value={statusLabel} onChange={(e) => setStatusLabel(e.target.value)} required />
+              <input className="bp-field" placeholder="Ubicacion" value={location} onChange={(e) => setLocation(e.target.value)} required />
+              <input className="bp-field" placeholder="URL de ubicacion" value={locationUrl} onChange={(e) => setLocationUrl(e.target.value)} />
+              <input className="bp-field" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+              <input className="bp-field" type="time" value={time} onChange={(e) => setTime(e.target.value)} required />
+              <select className="bp-field" value={statusLabel} onChange={(e) => setStatusLabel(e.target.value)}>
+                <option value="programado">programado</option>
+                <option value="cancelado">cancelado</option>
+                <option value="agotado">agotado</option>
+              </select>
+              <input
+                className="bp-field"
+                type="number"
+                min="0"
+                step="1"
+                placeholder="Capacidad"
+                value={capacity}
+                onChange={(e) => setCapacity(e.target.value)}
+                required
+              />
               <input
                 className="bp-field"
                 type="number"
@@ -134,13 +234,13 @@ function DashboardShows() {
               />
               <input
                 className="bp-field"
-                placeholder="URL de imagen"
-                value={image}
-                onChange={(e) => setImage(e.target.value)}
+                type="file"
+                accept="image/*"
+                onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
               />
               <div className="manage-actions">
-                <button type="submit" className="bp-btn bp-btn-small">
-                  {editingId ? 'Guardar cambios' : 'Agregar show'}
+                <button type="submit" className="bp-btn bp-btn-small" disabled={isSubmitting}>
+                  {isSubmitting ? 'Guardando...' : editingId ? 'Guardar cambios' : 'Agregar show'}
                 </button>
                 {editingId ? (
                   <button type="button" className="bp-btn bp-btn-small bp-btn-ghost" onClick={resetForm}>
@@ -154,24 +254,24 @@ function DashboardShows() {
 
           <article className="bp-contact-panel">
             <h2 className="bp-about-title">Shows ({items.length})</h2>
+            {isLoading ? <p className="bp-meta">Cargando shows...</p> : null}
             <div className="manage-list">
               {items.map((item) => (
                 <article className="manage-item" key={item.id}>
-                  {item.poster ? (
-                    <img src={item.poster} alt={item.title} className="manage-item-image" />
+                  {item.image ? (
+                    <img src={item.image} alt={item.title} className="manage-item-image" />
                   ) : (
                     <div className="manage-item-image" aria-hidden="true" />
                   )}
                   <div className="manage-item-copy">
                     <strong>{item.title}</strong>
-                    <p className="bp-meta">{item.venue}</p>
                     <p className="bp-meta">{item.location}</p>
-                    <p className="bp-meta">{item.date}</p>
+                    <p className="bp-meta">{formatDateLabel(item.date)} - {formatTimeLabel(item.time)}</p>
+                    <p className="bp-meta">Capacidad: {item.capacity}</p>
+                    <p className="bp-meta">Precio: Q{item.ticketPrice.toFixed(2)}</p>
+                    <p className="bp-meta">Estado: {item.status}</p>
                     <p className="bp-meta">{item.description}</p>
                     <div className="manage-actions">
-                      <Link to={`/shows/${item.id}`} className="bp-btn bp-btn-small">
-                        Ver show
-                      </Link>
                       <button type="button" className="bp-btn bp-btn-small bp-btn-ghost" onClick={() => startEdit(item)}>
                         Editar
                       </button>

@@ -1,16 +1,33 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../../src/context/CartContext';
 import { useAuth } from '../../src/context/AuthContext';
 import './Navbar.css';
+
+const RESERVED_ROOTS = new Set(['', 'login', 'dashboard', 'carrito', 'carrito-tickets']);
+
+function getBandSlug(pathname) {
+  const [firstSegment] = pathname.split('/').filter(Boolean);
+  return RESERVED_ROOTS.has(firstSegment || '') ? null : firstSegment;
+}
 
 function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
   const { merchTotalItems } = useCart();
   const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const closeMenu = () => setIsOpen(false);
+
+  const bandSlug = useMemo(() => getBandSlug(location.pathname), [location.pathname]);
+  const homePath = bandSlug ? `/${bandSlug}` : '/';
+
+  useEffect(() => {
+    setIsOpen(false);
+  }, [location.pathname, location.hash]);
+
+  const buildSectionHref = (sectionId) => `${homePath}#${sectionId}`;
 
   const handleLogout = () => {
     logout();
@@ -20,42 +37,61 @@ function NavBar() {
 
   return (
     <header className="site-header">
-      <a href="/#hero" className="logo" onClick={closeMenu}>
+      <Link to={homePath} className="logo" onClick={closeMenu}>
         <span className="logo-mark" aria-hidden="true">
           <img src="/icons/cart.svg" alt="Brand icon" />
         </span>
         <span className="logo-text">Lost In The Ocean</span>
-      </a>
+      </Link>
+
+      <div className="header-actions">
+        <Link to="/carrito" aria-label="Carrito de merch" className="header-cart" title="Carrito de merch">
+          <img src="/icons/cart.svg" alt="Cart" className="cart-icon" />
+          <span className="cart-count">{merchTotalItems}</span>
+        </Link>
+
+        <button
+          type="button"
+          className={`nav-toggle ${isOpen ? 'active' : ''}`}
+          aria-expanded={isOpen}
+          aria-label="Toggle navigation"
+          onClick={() => setIsOpen((prev) => !prev)}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
+      </div>
 
       <nav className={`site-nav ${isOpen ? 'open' : ''}`} aria-label="Main Navigation">
         <ul>
           <li>
-            <a href="/#hero" onClick={closeMenu}>
+            <a href={buildSectionHref('hero')} onClick={closeMenu}>
               Home
             </a>
           </li>
           <li>
-            <a href="/#about" onClick={closeMenu}>
+            <a href={buildSectionHref('about')} onClick={closeMenu}>
               About
             </a>
           </li>
           <li>
-            <a href="/#products" onClick={closeMenu}>
+            <a href={buildSectionHref('products')} onClick={closeMenu}>
               Merch
             </a>
           </li>
           <li>
-            <a href="/#posts" onClick={closeMenu}>
+            <a href={buildSectionHref('posts')} onClick={closeMenu}>
               Blog
             </a>
           </li>
           <li>
-            <a href="/#shows" onClick={closeMenu}>
+            <a href={buildSectionHref('shows')} onClick={closeMenu}>
               Shows
             </a>
           </li>
           <li>
-            <a href="/#contact" onClick={closeMenu}>
+            <a href={buildSectionHref('contact')} onClick={closeMenu}>
               Contacto
             </a>
           </li>
@@ -113,23 +149,6 @@ function NavBar() {
           </a>
         </div>
       </nav>
-
-      <Link to="/carrito" aria-label="Carrito de merch" className="header-cart" title="Carrito de merch">
-        <img src="/icons/cart.svg" alt="Cart" className="cart-icon" />
-        <span className="cart-count">{merchTotalItems}</span>
-      </Link>
-
-      <button
-        type="button"
-        className={`nav-toggle ${isOpen ? 'active' : ''}`}
-        aria-expanded={isOpen}
-        aria-label="Toggle navigation"
-        onClick={() => setIsOpen((prev) => !prev)}
-      >
-        <span />
-        <span />
-        <span />
-      </button>
     </header>
   );
 }

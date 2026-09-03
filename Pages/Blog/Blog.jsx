@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import NavBar from '../../Components/NavBar/NavBar';
 import Footer from '../../Components/Footer/Footer';
-import { getPublicPosts } from '../../src/api/bandApi';
+import { getPublicPosts, mapPublicacionToCard } from '../../src/api/publicacionesApi';
 import '../BandPublic/BandPublic.css';
 import '../BandPublic/Components/Posts/Posts.css';
 import './Blog.css';
@@ -17,14 +17,7 @@ function Blog() {
       try {
         setLoading(true);
         const data = await getPublicPosts(slug);
-        // Mapear campos del API al formato esperado
-        const mappedPosts = data.map((post) => ({
-          id: post.id ?? post.uuid,
-          title: post.titulo,
-          excerpt: post.contenido.substring(0, 150) + '...',
-          image: post.imagenUrl,
-          date: new Date(post.fechaPublicacion).toLocaleDateString('es-ES'),
-        }));
+        const mappedPosts = data.map(mapPublicacionToCard);
         setPosts(mappedPosts);
       } catch (error) {
         console.error('Error loading posts:', error);

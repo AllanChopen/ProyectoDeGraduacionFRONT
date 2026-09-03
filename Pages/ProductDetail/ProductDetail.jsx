@@ -2,31 +2,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import NavBar from '../../Components/NavBar/NavBar';
 import Footer from '../../Components/Footer/Footer';
-import { getPublicProductDetail, getPublicProducts } from '../../src/api/bandApi';
+import {
+  getPublicProductDetail,
+  getPublicProducts,
+  mapProductoToDetail
+} from '../../src/api/productosApi';
 import { useCart } from '../../src/context/CartContext';
 import '../BandPublic/BandPublic.css';
 import './ProductDetail.css';
-
-function mapPublicProduct(product, fallbackId = null) {
-  return {
-    id: Number(product.id ?? fallbackId ?? 0) || null,
-    uuid: product.uuid,
-    name: product.nombre,
-    description: product.descripcion,
-    price: Number(product.precio ?? 0),
-    available: Boolean(product.disponible),
-    stock: Number(product.stock ?? 0),
-    type: 'Merch oficial',
-    image: product.imagenUrl ?? null,
-    variants: (product.variaciones ?? []).map((variant) => ({
-      id: variant.id ?? variant.uuid,
-      label: variant.nombre || variant.atributos || 'Variacion',
-      price: Number(variant.precio ?? 0),
-      stock: Number(variant.stock ?? 0),
-      available: Boolean(variant.disponible),
-    }))
-  };
-}
 
 function ProductDetail() {
   const { slug, productId } = useParams();
@@ -43,7 +26,7 @@ function ProductDetail() {
         const numericProductId = Number(productId);
         if (Number.isInteger(numericProductId) && numericProductId > 0) {
           const data = await getPublicProductDetail(slug, numericProductId);
-          setProduct(mapPublicProduct(data, numericProductId));
+          setProduct(mapProductoToDetail(data, numericProductId));
           return;
         }
 
@@ -55,7 +38,7 @@ function ProductDetail() {
           return;
         }
 
-        setProduct(mapPublicProduct(selected));
+        setProduct(mapProductoToDetail(selected));
       } catch (error) {
         console.error('Error loading product detail:', error);
         setProduct(null);

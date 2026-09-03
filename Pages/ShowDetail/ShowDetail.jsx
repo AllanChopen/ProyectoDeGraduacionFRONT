@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import NavBar from '../../Components/NavBar/NavBar';
 import Footer from '../../Components/Footer/Footer';
-import { getPublicEventDetail } from '../../src/api/bandApi';
+import { getPublicEventDetail, mapEventoToDetail } from '../../src/api/eventosApi';
 import { useCart } from '../../src/context/CartContext';
 import '../BandPublic/BandPublic.css';
 import './ShowDetail.css';
@@ -19,28 +19,7 @@ function ShowDetail() {
       try {
         setLoading(true);
         const data = await getPublicEventDetail(slug, showId);
-        // Mapear campos del API
-        const mappedShow = {
-          id: data.id ?? data.uuid ?? showId,
-          title: data.nombre,
-          description: data.descripcion,
-          date: new Date(data.fecha).toLocaleDateString('es-ES'),
-          time: data.hora,
-          venue: data.ubicacion,
-          location: data.ubicacion,
-          capacity: data.capacidad,
-          price: data.precioEntrada,
-          status: data.estado,
-          poster: null,
-          ticketTypes: [
-            {
-              id: `show-${data.id ?? data.uuid ?? showId}-general`,
-              label: 'General',
-              price: data.precioEntrada,
-              stock: data.capacidad,
-            },
-          ],
-        };
+        const mappedShow = mapEventoToDetail(data, showId);
         setShow(mappedShow);
       } catch (err) {
         console.error('Error loading show:', err);
@@ -148,9 +127,11 @@ function ShowDetail() {
 
           <div className="show-meta-grid">
             <p className="bp-meta">Lugar: {show.venue}</p>
-            <p className="bp-meta">Ciudad: {show.location}</p>
             <p className="bp-meta">Fecha: {show.date}</p>
+            <p className="bp-meta">Hora: {show.time}</p>
+            <p className="bp-meta">Capacidad: {show.capacity}</p>
             <p className="bp-meta">Estado: {show.status}</p>
+            <p className="bp-meta">Precio base: Q{Number(show.price ?? 0).toFixed(2)}</p>
           </div>
 
           <div className="show-field">
@@ -207,6 +188,16 @@ function ShowDetail() {
             <button type="button" className="bp-btn" onClick={handleAddTicket}>
               Anadir tickets
             </button>
+            {show.mapsUrl ? (
+              <a
+                href={show.mapsUrl}
+                className="bp-btn bp-btn-ghost"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Ver Google Maps
+              </a>
+            ) : null}
             <Link to="/carrito-tickets" className="bp-btn">
               Ver carrito tickets
             </Link>

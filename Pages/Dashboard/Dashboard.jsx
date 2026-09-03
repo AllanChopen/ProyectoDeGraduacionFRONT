@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Footer from '../../Components/Footer/Footer';
 import NavBar from '../../Components/NavBar/NavBar';
+import { getDashboardSummary } from '../../src/api/dashboardApi';
 import {
   getManagedPosts,
   getManagedProducts,
@@ -23,6 +24,9 @@ function Dashboard() {
   const [products, setProducts] = useState([]);
   const [shows, setShows] = useState([]);
   const [posts, setPosts] = useState([]);
+  const [dashboardSummary, setDashboardSummary] = useState(null);
+  const [summaryError, setSummaryError] = useState('');
+  const [isLoadingSummary, setIsLoadingSummary] = useState(false);
   const [newsletterSends, setNewsletterSends] = useState([]);
   const [contactMessages, setContactMessages] = useState([]);
   const [subscribers, setSubscribers] = useState([]);
@@ -32,23 +36,85 @@ function Dashboard() {
   const [statusMessage, setStatusMessage] = useState('');
 
   useEffect(() => {
+    let isMounted = true;
+
     setProducts(getManagedProducts());
     setShows(getManagedShows());
     setPosts(getManagedPosts());
     setNewsletterSends(readList(DASH_NEWSLETTER_SENDS_KEY));
     setContactMessages(readList(CONTACT_MESSAGES_KEY));
     setSubscribers(readList(NEWSLETTER_SUBSCRIBERS_KEY));
+
+    const loadSummary = async () => {
+      setIsLoadingSummary(true);
+      setSummaryError('');
+
+      try {
+        const summary = await getDashboardSummary();
+        if (!isMounted) {
+          return;
+        }
+        setDashboardSummary(summary);
+      } catch (error) {
+        if (!isMounted) {
+          return;
+        }
+        setSummaryError(error.message || 'No se pudo cargar el resumen del dashboard.');
+      } finally {
+        if (isMounted) {
+          setIsLoadingSummary(false);
+        }
+      }
+    };
+
+    loadSummary();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const overview = useMemo(
     () => [
-      { label: 'Productos', value: products.length, to: '/dashboard/productos', cta: 'Gestionar productos' },
-      { label: 'Shows', value: shows.length, to: '/dashboard/shows', cta: 'Gestionar shows' },
-      { label: 'Noticias Blog', value: posts.length, to: '/dashboard/blog', cta: 'Gestionar noticias' },
-      { label: 'Suscriptores Newsletter', value: subscribers.length, to: '/dashboard', cta: 'Ver lista' },
-      { label: 'Mensajes de Contacto', value: contactMessages.length, to: '/dashboard', cta: 'Ver mensajes' }
+      {
+        label: 'Productos',
+        value: dashboardSummary?.productos ?? products.length,
+        to: '/dashboard/productos',
+        cta: 'Gestionar productos'
+      },
+      {
+        label: 'Shows',
+        value: dashboardSummary?.shows ?? shows.length,
+        to: '/dashboard/shows',
+        cta: 'Gestionar shows'
+      },
+      {
+        label: 'Noticias Blog',
+        value: dashboardSummary?.noticias ?? posts.length,
+        to: '/dashboard/blog',
+        cta: 'Gestionar noticias'
+      },
+      {
+        label: 'Suscriptores Newsletter',
+        value: dashboardSummary?.suscriptores ?? subscribers.length,
+        to: '/dashboard',
+        cta: 'Ver lista'
+      },
+      {
+        label: 'Mensajes de Contacto',
+        value: dashboardSummary?.mensajes ?? contactMessages.length,
+        to: '/dashboard',
+        cta: 'Ver mensajes'
+      }
     ],
-    [products.length, shows.length, posts.length, subscribers.length, contactMessages.length]
+    [
+      dashboardSummary,
+      products.length,
+      shows.length,
+      posts.length,
+      subscribers.length,
+      contactMessages.length
+    ]
   );
 
   const handleSendNewsletter = (event) => {
@@ -77,8 +143,12 @@ function Dashboard() {
           <h1 className="bp-section-title">Dashboard</h1>
           <div className="bp-divider" />
           <p className="dashboard-subtitle">
-            Panel de control: navega a cada modulo para agregar, editar, eliminar y revisar contenido.
+            {dashboardSummary?.banda
+              ? `Panel de control de ${dashboardSummary.banda}: navega a cada modulo para agregar, editar, eliminar y revisar contenido.`
+              : 'Panel de control: navega a cada modulo para agregar, editar, eliminar y revisar contenido.'}
           </p>
+          {isLoadingSummary ? <p className="bp-meta">Cargando resumen del dashboard...</p> : null}
+          {summaryError ? <p className="bp-meta">{summaryError}</p> : null}
         </div>
 
         <div className="bp-container dashboard-overview-grid">
