@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import NavBar from '../../Components/NavBar/NavBar';
 import Footer from '../../Components/Footer/Footer';
+import LoadingState from '../../Components/LoadingState/LoadingState';
 import {
   getPublicProductDetail,
   getPublicProducts,
@@ -53,6 +54,8 @@ function ProductDetail() {
     }
   }, [slug, productId]);
 
+  const hasTalla = Boolean(product?.hasTalla);
+
   const variants = product?.variants?.length
     ? product.variants
     : [
@@ -80,16 +83,14 @@ function ProductDetail() {
     return variants.find((variant) => variant.id === selectedVariantId) ?? variants[0];
   }, [product, selectedVariantId, variants]);
 
+  const visibleStock = selectedVariant?.stock ?? product?.stock ?? 0;
+  const visiblePrice = Number(product?.price ?? 0);
+
   if (loading) {
     return (
       <main className="bp-page product-page">
         <NavBar />
-        <section className="bp-section" aria-label="Cargando producto">
-          <div className="bp-section-header">
-            <h1 className="bp-section-title">Cargando producto...</h1>
-            <div className="bp-divider" />
-          </div>
-        </section>
+        <LoadingState label="Cargando producto..." />
         <Footer />
       </main>
     );
@@ -125,14 +126,14 @@ function ProductDetail() {
       name: product.name,
       variantId: selectedVariant.id,
       variantLabel: selectedVariant.label,
-      unitPrice: selectedVariant.price,
+      unitPrice: visiblePrice,
       quantity
     });
 
     setFeedback('Producto agregado al carrito.');
   };
 
-  const total = selectedVariant ? selectedVariant.price * quantity : 0;
+  const total = visiblePrice * quantity;
 
   return (
     <main className="bp-page product-page">
@@ -152,23 +153,32 @@ function ProductDetail() {
           <h1 className="bp-section-title product-title">{product.name}</h1>
           <p className="product-description">{product.description}</p>
 
-          <div className="product-field">
-            <label htmlFor="variant" className="product-label">
-              Variacion
-            </label>
-            <select
-              id="variant"
-              className="bp-field product-select"
-              value={selectedVariantId}
-              onChange={(event) => setSelectedVariantId(event.target.value)}
-            >
-              {variants.map((variant) => (
-                <option key={variant.id} value={variant.id} disabled={variant.available === false || variant.stock < 1}>
-                  {variant.label} - Q{variant.price.toFixed(2)}
-                </option>
-              ))}
-            </select>
-          </div>
+          {hasTalla ? (
+            <div className="product-field">
+              <label htmlFor="variant" className="product-label">
+                Talla
+              </label>
+              <select
+                id="variant"
+                className="bp-field product-select"
+                value={selectedVariantId}
+                onChange={(event) => setSelectedVariantId(event.target.value)}
+              >
+                {variants.map((variant) => (
+                  <option key={variant.id} value={variant.id} disabled={variant.available === false || variant.stock < 1}>
+                    {variant.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <div className="product-field">
+              <div className="product-stock">
+                <span>Stock general</span>
+                <strong>{visibleStock}</strong>
+              </div>
+            </div>
+          )}
 
           <div className="product-field product-row">
             <div>
@@ -192,13 +202,13 @@ function ProductDetail() {
             </div>
 
             <div className="product-stock">
-              <span>Disponibles</span>
-              <strong>{selectedVariant?.stock ?? 0}</strong>
+              <span>{hasTalla ? 'Disponibles' : 'Stock general'}</span>
+              <strong>{visibleStock}</strong>
             </div>
           </div>
 
           <div className="product-price-wrap">
-            <p className="bp-price product-price">Q{selectedVariant?.price.toFixed(2)}</p>
+            <p className="bp-price product-price">Q{visiblePrice.toFixed(2)}</p>
             <p className="product-total">Total: Q{total.toFixed(2)}</p>
           </div>
 

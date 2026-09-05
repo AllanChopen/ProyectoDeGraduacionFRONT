@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import Footer from '../../Components/Footer/Footer';
+import LoadingState from '../../Components/LoadingState/LoadingState';
 import NavBar from '../../Components/NavBar/NavBar';
 import { useAuth } from '../../src/context/AuthContext';
 import {
@@ -39,7 +41,6 @@ function mapEventToItem(event) {
     mapsUrl: event.ubicacionUrl || '',
     date: event.fecha || '',
     time: event.hora || '',
-    status: event.estado || 'Sin estado',
     description: event.descripcion || '',
     image: event.imagenUrl || '',
     capacity: Number(event.capacidad ?? 0),
@@ -48,6 +49,7 @@ function mapEventToItem(event) {
 }
 
 function DashboardShows() {
+  const { slug = '' } = useParams();
   const { bandaId } = useAuth();
   const [items, setItems] = useState([]);
   const [editingId, setEditingId] = useState(null);
@@ -56,7 +58,6 @@ function DashboardShows() {
   const [locationUrl, setLocationUrl] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
-  const [statusLabel, setStatusLabel] = useState('programado');
   const [description, setDescription] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [capacity, setCapacity] = useState('');
@@ -89,6 +90,16 @@ function DashboardShows() {
     loadItems();
   }, []);
 
+  if (isLoading) {
+    return (
+      <main className="bp-page manage-page">
+        <NavBar />
+        <LoadingState label="Cargando shows..." />
+        <Footer />
+      </main>
+    );
+  }
+
   const resetForm = () => {
     setEditingId(null);
     setTitle('');
@@ -96,7 +107,6 @@ function DashboardShows() {
     setLocationUrl('');
     setDate('');
     setTime('');
-    setStatusLabel('programado');
     setDescription('');
     setImageFile(null);
     setCapacity('');
@@ -124,7 +134,6 @@ function DashboardShows() {
       ubicacionUrl: locationUrl,
       capacidad: Number(capacity) || 0,
       precioEntrada: Number(ticketPrice) || 0,
-      estado: statusLabel,
       imagenFile: imageFile || undefined,
     };
 
@@ -153,7 +162,6 @@ function DashboardShows() {
     setLocationUrl(item.mapsUrl ?? '');
     setDate(toDateInputValue(item.date));
     setTime(formatTimeLabel(item.time));
-    setStatusLabel(item.status ?? 'programado');
     setDescription(item.description ?? '');
     setImageFile(null);
     setCapacity(String(item.capacity ?? 0));
@@ -187,8 +195,13 @@ function DashboardShows() {
           <h1 className="bp-section-title">Gestionar Shows</h1>
           <div className="bp-divider" />
           <p className="manage-subtitle">
-            Administra fechas, hora, ubicacion, capacidad, precio, estado e imagen desde el endpoint de eventos.
+            Administra fechas, hora, ubicacion, capacidad, precio e imagen desde el endpoint de eventos.
           </p>
+          <div className="manage-top-actions">
+            <Link to={`/${slug}/dashboard`} className="bp-btn bp-btn-small bp-btn-ghost">
+              Volver al dashboard
+            </Link>
+          </div>
         </div>
 
         <div className="bp-container manage-layout">
@@ -200,11 +213,6 @@ function DashboardShows() {
               <input className="bp-field" placeholder="URL de ubicacion" value={locationUrl} onChange={(e) => setLocationUrl(e.target.value)} />
               <input className="bp-field" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
               <input className="bp-field" type="time" value={time} onChange={(e) => setTime(e.target.value)} required />
-              <select className="bp-field" value={statusLabel} onChange={(e) => setStatusLabel(e.target.value)}>
-                <option value="programado">programado</option>
-                <option value="cancelado">cancelado</option>
-                <option value="agotado">agotado</option>
-              </select>
               <input
                 className="bp-field"
                 type="number"
@@ -254,7 +262,6 @@ function DashboardShows() {
 
           <article className="bp-contact-panel">
             <h2 className="bp-about-title">Shows ({items.length})</h2>
-            {isLoading ? <p className="bp-meta">Cargando shows...</p> : null}
             <div className="manage-list">
               {items.map((item) => (
                 <article className="manage-item" key={item.id}>
@@ -269,9 +276,11 @@ function DashboardShows() {
                     <p className="bp-meta">{formatDateLabel(item.date)} - {formatTimeLabel(item.time)}</p>
                     <p className="bp-meta">Capacidad: {item.capacity}</p>
                     <p className="bp-meta">Precio: Q{item.ticketPrice.toFixed(2)}</p>
-                    <p className="bp-meta">Estado: {item.status}</p>
-                    <p className="bp-meta">{item.description}</p>
+                    <p className="bp-meta manage-item-description">{item.description}</p>
                     <div className="manage-actions">
+                      <Link to={`/${slug}/shows/${item.id}`} className="bp-btn bp-btn-small">
+                        Ver show completo
+                      </Link>
                       <button type="button" className="bp-btn bp-btn-small bp-btn-ghost" onClick={() => startEdit(item)}>
                         Editar
                       </button>

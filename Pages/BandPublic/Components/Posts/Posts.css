@@ -1,3 +1,16 @@
+#posts.bp-section {
+  padding-top: clamp(1rem, 2.6vw, 1.5rem);
+  padding-bottom: clamp(1rem, 2.8vw, 1.9rem);
+}
+
+#posts .bp-section-header {
+  margin-bottom: 1.25rem;
+}
+
+#posts .bp-more-wrap {
+  margin-top: 0.65rem;
+}
+
 .bp-post-card {
   min-width: 180px;
   max-width: 220px;

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import NavBar from '../../Components/NavBar/NavBar';
 import Footer from '../../Components/Footer/Footer';
+import LoadingState from '../../Components/LoadingState/LoadingState';
 import { getPublicEvents, mapEventoToCard, sortEventosForDisplay } from '../../src/api/eventosApi';
 import '../BandPublic/BandPublic.css';
 import '../BandPublic/Components/Shows/Shows.css';
@@ -31,6 +32,16 @@ function Tickets() {
 		}
 	}, [slug]);
 
+	if (loading) {
+		return (
+			<main className="bp-page tickets-page">
+				<NavBar />
+				<LoadingState label="Cargando shows..." />
+				<Footer />
+			</main>
+		);
+	}
+
 	return (
 		<main className="bp-page tickets-page">
 			<NavBar />
@@ -52,9 +63,7 @@ function Tickets() {
 
 		<section className="bp-section" aria-label="Listado completo de shows">
 			<div className="bp-container tickets-grid">
-				{loading ? (
-					<p style={{ gridColumn: '1 / -1', textAlign: 'center' }}>Cargando shows...</p>
-				) : shows.length > 0 ? (
+				{shows.length > 0 ? (
 					shows.map((show) => (
 						<article className="bp-show-card tickets-show-card" key={show.id}>
 							{show.poster ? (

@@ -1,0 +1,31 @@
+.loading-state {
+  min-height: 38vh;
+  display: grid;
+  align-items: center;
+}
+
+.loading-state-wrap {
+  display: grid;
+  justify-items: center;
+  gap: 0.7rem;
+}
+
+.loading-state-spinner {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.25);
+  border-top-color: var(--bp-text);
+  animation: loading-spin 0.9s linear infinite;
+}
+
+.loading-state-text {
+  margin: 0;
+  color: var(--bp-text-muted);
+}
+
+@keyframes loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

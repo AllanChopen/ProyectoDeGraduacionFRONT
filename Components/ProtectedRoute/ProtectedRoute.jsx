@@ -1,11 +1,22 @@
-import { Navigate } from 'react-router-dom';
+import { useLayoutEffect } from 'react';
+import { Navigate, useLocation, useParams } from 'react-router-dom';
 import { useAuth } from '../../src/context/AuthContext';
 
 function ProtectedRoute({ children }) {
-  const { isAuthenticated } = useAuth();
+  const { slug = '' } = useParams();
+  const location = useLocation();
+  const { hasSessionForSlug, activateSession } = useAuth();
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+  const isAllowed = hasSessionForSlug(slug);
+
+  useLayoutEffect(() => {
+    if (isAllowed) {
+      activateSession(slug);
+    }
+  }, [activateSession, isAllowed, slug]);
+
+  if (!isAllowed) {
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
   return children;

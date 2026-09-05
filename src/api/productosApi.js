@@ -14,6 +14,8 @@ function buildProductFormData(payload) {
   appendIfPresent(formData, 'Descripcion', payload.descripcion);
   appendIfPresent(formData, 'Precio', String(payload.precio ?? 0));
   appendIfPresent(formData, 'Disponible', String(Boolean(payload.disponible)));
+  appendIfPresent(formData, 'Stock', String(payload.stock ?? 0));
+  appendIfPresent(formData, 'TieneTalla', String(Boolean(payload.tieneTalla)));
 
   if (payload.imagenFile) {
     formData.append('Imagen', payload.imagenFile);
@@ -84,15 +86,16 @@ export const mapProductVariant = (variant) => ({
   productId: variant?.productoId ?? null,
   label: variant?.nombre || 'Variacion',
   name: variant?.nombre || 'Variacion',
-  price: Number(variant?.precio ?? 0),
   stock: Number(variant?.stock ?? 0),
   available: Boolean(variant?.disponible),
-  attributes: variant?.atributos || '',
 });
 
 export const mapProductoToCard = (product, fallbackId = null) => {
   const variants = (product?.variaciones ?? []).map(mapProductVariant);
-  const totalStock = variants.reduce((sum, variant) => sum + Number(variant.stock ?? 0), 0);
+  const hasSizes = Boolean(product?.tieneTalla);
+  const totalStock = hasSizes
+    ? variants.reduce((sum, variant) => sum + Number(variant.stock ?? 0), 0)
+    : Number(product?.stock ?? variants.reduce((sum, variant) => sum + Number(variant.stock ?? 0), 0));
 
   return {
     id: Number(product?.id ?? fallbackId ?? 0) || null,
@@ -102,7 +105,8 @@ export const mapProductoToCard = (product, fallbackId = null) => {
     price: Number(product?.precio ?? 0),
     available: Boolean(product?.disponible),
     stock: totalStock,
-    type: variants[0]?.attributes || 'Merch oficial',
+    hasTalla: hasSizes,
+    type: hasSizes ? 'Con tallas' : 'Stock general',
     image: product?.imagenUrl || null,
     variants,
   };
@@ -110,6 +114,7 @@ export const mapProductoToCard = (product, fallbackId = null) => {
 
 export const mapProductoToDetail = (product, fallbackId = null) => {
   const mapped = mapProductoToCard(product, fallbackId);
+  const singleVariantStock = Number(product?.stock ?? mapped.stock ?? 0);
   return {
     ...mapped,
     variants: mapped.variants.length
@@ -120,7 +125,7 @@ export const mapProductoToDetail = (product, fallbackId = null) => {
             label: 'Presentacion unica',
             name: 'Presentacion unica',
             price: mapped.price,
-            stock: mapped.available ? 1 : 0,
+            stock: mapped.hasTalla ? 0 : singleVariantStock,
             available: mapped.available,
             attributes: '',
           },

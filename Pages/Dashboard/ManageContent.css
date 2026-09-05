@@ -10,6 +10,12 @@
   color: var(--bp-text-muted);
 }
 
+.manage-top-actions {
+  margin-top: 0.9rem;
+  display: flex;
+  justify-content: center;
+}
+
 .manage-layout {
   display: grid;
   grid-template-columns: minmax(300px, 1fr) minmax(0, 2fr);
@@ -22,8 +28,82 @@
   gap: 0.55rem;
 }
 
+.manage-form > .bp-meta {
+  margin-top: 0.2rem;
+}
+
+.manage-section-compact {
+  margin-top: 0.45rem;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.manage-section-compact > .bp-divider {
+  margin-top: 0.15rem;
+}
+
+.manage-section-compact .bp-about-title,
+.manage-section-compact .bp-meta {
+  margin: 0;
+}
+
+.manage-variant-box {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.2rem;
+  max-height: 340px;
+  overflow: auto;
+  padding: 0.1rem 0.2rem 0 0;
+}
+
 .manage-textarea {
   min-height: 110px;
+}
+
+.manage-variant-builder {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.manage-variant-builder-head {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.manage-variant-list {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.manage-variant-row {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.manage-variant-top {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) minmax(90px, 120px);
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.manage-variant-bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.manage-variant-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
 }
 
 .manage-list {
@@ -39,6 +119,8 @@
   border-radius: 8px;
   background: var(--bp-surface-alt);
   padding: 0.7rem;
+  max-height: 320px;
+  overflow: hidden;
 }
 
 .manage-item-image {
@@ -52,6 +134,24 @@
 .manage-item-copy {
   display: grid;
   gap: 0.25rem;
+  min-height: 0;
+}
+
+.manage-item-description {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
+.manage-message-item {
+  grid-template-columns: 1fr;
+  text-decoration: none;
+  color: inherit;
+}
+
+.manage-message-back-action {
+  margin-top: 0.8rem;
 }
 
 .manage-actions {
@@ -70,5 +170,22 @@
 @media (max-width: 980px) {
   .manage-layout {
     grid-template-columns: 1fr;
+  }
+
+  .manage-variant-box {
+    max-height: 280px;
+  }
+
+  .manage-variant-row {
+    gap: 0.6rem;
+  }
+
+  .manage-variant-top {
+    grid-template-columns: 1fr;
+  }
+
+  .manage-variant-bottom {
+    flex-direction: column;
+    align-items: stretch;
   }
 }

@@ -1,3 +1,12 @@
+#contact.bp-section {
+  padding-top: clamp(0.9rem, 2.4vw, 1.4rem);
+  padding-bottom: clamp(1.2rem, 3.2vw, 2.2rem);
+}
+
+#contact .bp-section-header {
+  margin-bottom: 1.15rem;
+}
+
 .bp-contact-grid {
   display: grid;
   grid-template-columns: 1fr 420px;

@@ -1,16 +1,17 @@
 const API_URL = import.meta.env.VITE_API_URL;
-const TOKEN_STORAGE_KEY = 'lito_auth_token';
+import { getTokenForActiveSlug } from '../utils/authSessionStorage';
 
 export const apiClient = async (endpoint, options = {}) => {
-  const token = localStorage.getItem(TOKEN_STORAGE_KEY);
-  const isFormDataBody = typeof FormData !== 'undefined' && options.body instanceof FormData;
+  const { skipAuth = false, ...requestOptions } = options;
+  const token = getTokenForActiveSlug();
+  const isFormDataBody = typeof FormData !== 'undefined' && requestOptions.body instanceof FormData;
 
   const response = await fetch(`${API_URL}${endpoint}`, {
-    ...options,
+    ...requestOptions,
     headers: {
       ...(isFormDataBody ? {} : { 'Content-Type': 'application/json' }),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
+      ...(!skipAuth && token ? { Authorization: `Bearer ${token}` } : {}),
+      ...requestOptions.headers,
     },
   });
 

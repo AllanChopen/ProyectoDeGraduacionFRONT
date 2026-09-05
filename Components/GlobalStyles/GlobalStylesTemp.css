@@ -1,15 +1,5 @@
 /* === styles v5 (title font + about + history) === */
 
-/* Font face for titles */
-@font-face {
-  font-family: 'Flying Hollander';
-  /* only ttf is present in public/fonts; avoid 404s by using the available file */
-  src: url('/fonts/FlyingHollander.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
 /* Root / Palette */
 :root {
   --c-black-deep:#0d0107;
@@ -33,7 +23,7 @@
   --radius-xs:3px; --radius-sm:5px; --radius:10px; --radius-lg:18px;
   --font-sans:'Inter',system-ui,sans-serif;
   --font-display:'Unica One',var(--font-sans);
-  --font-title:'Flying Hollander','Unica One',var(--font-sans);
+  --font-title:var(--font-sans);
   font-size:16px;
 }
 

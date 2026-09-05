@@ -1,15 +1,18 @@
 import './About.css';
 
-function About({ paragraphs }) {
-  return (
-    <section id="about" className="bp-section bp-about-section" aria-label="About Lost In The Ocean">
-      <div className="bp-section-header">
-        <h2 className="bp-section-title">Biografia</h2>
-        <div className="bp-divider" />
-      </div>
+function About({ paragraphs, image, bandName }) {
+  const aboutBackground = image ? `url("${image}")` : 'none';
 
-      <div className="bp-container bp-about-grid">
-        <article className="bp-about-card">
+  return (
+    <section
+      id="about"
+      className="bp-about-section"
+      aria-label={`Biografia de ${bandName || 'la banda'}`}
+      style={{ '--bp-about-image': aboutBackground }}
+    >
+      <div className="bp-about-backdrop" aria-hidden="true" />
+      <div className="bp-about-inner">
+        <article className="bp-about-copy">
           {paragraphs.map((paragraph) => (
             <p key={paragraph} className="bp-about-text">
               {paragraph}

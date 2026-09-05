@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { getBandById, getPublicBand } from '../../src/api/bandApi';
+import { getPublicSocialLinks } from '../../src/api/redSocialApi';
 import { useCart } from '../../src/context/CartContext';
 import { useAuth } from '../../src/context/AuthContext';
+import { buildSocialLinksMap } from '../../src/utils/socialLinks';
 import './Navbar.css';
 
 const RESERVED_ROOTS = new Set(['', 'login', 'dashboard', 'carrito', 'carrito-tickets']);
@@ -13,26 +16,129 @@ function getBandSlug(pathname) {
 
 function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [managedSlug, setManagedSlug] = useState('');
+  const [brandName, setBrandName] = useState('');
+  const [socialLinks, setSocialLinks] = useState(() => buildSocialLinksMap());
   const { merchTotalItems } = useCart();
-  const { isAuthenticated, logout } = useAuth();
+  const { bandaId, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   const closeMenu = () => setIsOpen(false);
 
   const bandSlug = useMemo(() => getBandSlug(location.pathname), [location.pathname]);
-  const homePath = bandSlug ? `/${bandSlug}` : '/';
+  const homePath = bandSlug
+    ? `/${bandSlug}`
+    : managedSlug
+      ? `/${managedSlug}`
+      : '/';
+  const dashboardPath = bandSlug
+    ? `/${bandSlug}/dashboard`
+    : managedSlug
+      ? `/${managedSlug}/dashboard`
+      : '/login';
 
   useEffect(() => {
     setIsOpen(false);
   }, [location.pathname, location.hash]);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadManagedSlug = async () => {
+      if (!isAuthenticated || !bandaId) {
+        if (isMounted) {
+          setManagedSlug('');
+        }
+        return;
+      }
+
+      try {
+        const band = await getBandById(bandaId);
+        if (isMounted) {
+          setManagedSlug(band?.slug ?? '');
+        }
+      } catch {
+        if (isMounted) {
+          setManagedSlug('');
+        }
+      }
+    };
+
+    loadManagedSlug();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [bandaId, isAuthenticated]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadBrandName = async () => {
+      if (!bandSlug) {
+        if (isMounted) {
+          setBrandName('');
+        }
+        return;
+      }
+
+      try {
+        const band = await getPublicBand(bandSlug);
+        if (isMounted) {
+          setBrandName(band?.nombre || '');
+        }
+      } catch {
+        if (isMounted) {
+          setBrandName('');
+        }
+      }
+    };
+
+    loadBrandName();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [bandSlug]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadSocialLinks = async () => {
+      if (!bandSlug) {
+        if (isMounted) {
+          setSocialLinks(buildSocialLinksMap());
+        }
+        return;
+      }
+
+      try {
+        const data = await getPublicSocialLinks(bandSlug);
+        if (isMounted) {
+          setSocialLinks(buildSocialLinksMap(data));
+        }
+      } catch {
+        if (isMounted) {
+          setSocialLinks(buildSocialLinksMap());
+        }
+      }
+    };
+
+    loadSocialLinks();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [bandSlug]);
+
   const buildSectionHref = (sectionId) => `${homePath}#${sectionId}`;
 
   const handleLogout = () => {
+    const principalSlug = bandSlug || managedSlug;
     logout();
     closeMenu();
-    navigate('/login');
+    navigate(principalSlug ? `/${principalSlug}` : '/', { replace: true });
   };
 
   return (
@@ -41,7 +147,7 @@ function NavBar() {
         <span className="logo-mark" aria-hidden="true">
           <img src="/icons/cart.svg" alt="Brand icon" />
         </span>
-        <span className="logo-text">Lost In The Ocean</span>
+        {brandName ? <span className="logo-text">{brandName}</span> : null}
       </Link>
 
       <div className="header-actions">
@@ -96,7 +202,7 @@ function NavBar() {
             </a>
           </li>
           <li>
-            <Link to="/dashboard" onClick={closeMenu}>
+            <Link to={dashboardPath} onClick={closeMenu}>
               Dashboard
             </Link>
           </li>
@@ -114,39 +220,47 @@ function NavBar() {
         </ul>
 
         <div className="nav-social">
-          <a
-            href="https://www.instagram.com/lostintheoceanband"
-            target="_blank"
-            rel="noreferrer"
-            aria-label="Instagram"
-            className="ico"
-            title="Instagram"
-          >
-            <img src="/icons/instagram.svg" alt="Instagram" />
-          </a>
-          <a
-            href="https://www.facebook.com"
-            target="_blank"
-            rel="noreferrer"
-            aria-label="Facebook"
-            className="ico"
-            title="Facebook"
-          >
-            <img src="/icons/facebook.svg" alt="Facebook" />
-          </a>
-          <a
-            href="https://www.tiktok.com/@lito.band"
-            target="_blank"
-            rel="noreferrer"
-            aria-label="TikTok"
-            className="ico"
-            title="TikTok"
-          >
-            <img src="/icons/tiktok.svg" alt="TikTok" />
-          </a>
-          <a href="mailto:litobandaoficial@gmail.com" aria-label="Email" className="ico" title="Email">
-            <img src="/icons/mail.svg" alt="Email" />
-          </a>
+          {socialLinks.instagram.href ? (
+            <a
+              href={socialLinks.instagram.href}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Instagram"
+              className="ico"
+              title="Instagram"
+            >
+              <img src="/icons/instagram.svg" alt="Instagram" />
+            </a>
+          ) : null}
+          {socialLinks.facebook.href ? (
+            <a
+              href={socialLinks.facebook.href}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Facebook"
+              className="ico"
+              title="Facebook"
+            >
+              <img src="/icons/facebook.svg" alt="Facebook" />
+            </a>
+          ) : null}
+          {socialLinks.tiktok.href ? (
+            <a
+              href={socialLinks.tiktok.href}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="TikTok"
+              className="ico"
+              title="TikTok"
+            >
+              <img src="/icons/tiktok.svg" alt="TikTok" />
+            </a>
+          ) : null}
+          {socialLinks.email.href ? (
+            <a href={socialLinks.email.href} aria-label="Email" className="ico" title="Email">
+              <img src="/icons/mail.svg" alt="Email" />
+            </a>
+          ) : null}
         </div>
       </nav>
     </header>

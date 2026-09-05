@@ -1,5 +1,7 @@
 .bp-products {
-  margin-top: 1.5rem;
+  margin-top: 0;
+  padding-top: clamp(1rem, 2.8vw, 1.6rem);
+  padding-bottom: clamp(1rem, 2.8vw, 1.8rem);
 }
 
 .bp-carousel-wrap {

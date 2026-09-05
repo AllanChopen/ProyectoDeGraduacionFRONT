@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import Footer from '../../Components/Footer/Footer';
+import LoadingState from '../../Components/LoadingState/LoadingState';
 import NavBar from '../../Components/NavBar/NavBar';
 import {
   createDashboardProduct,
@@ -16,7 +18,30 @@ import {
 import '../BandPublic/BandPublic.css';
 import './ManageContent.css';
 
+const SIZE_PRESETS = ['S', 'M', 'L', 'XL', 'XXL'];
+
+function createDraftVariationRow(index = 0, overrides = {}) {
+  return {
+    tempId: overrides.tempId ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    variationId: overrides.variationId ?? null,
+    name: overrides.name ?? SIZE_PRESETS[index] ?? `Talla ${index + 1}`,
+    stock: overrides.stock ?? '',
+    available: overrides.available ?? true,
+  };
+}
+
+function mapDraftVariationFromApi(variation, index) {
+  return createDraftVariationRow(index, {
+    tempId: variation?.id ?? variation?.uuid ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    variationId: variation?.id ?? variation?.uuid ?? null,
+    name: variation?.name ?? variation?.nombre ?? SIZE_PRESETS[index] ?? `Talla ${index + 1}`,
+    stock: String(variation?.stock ?? 0),
+    available: variation?.available !== false && variation?.disponible !== false,
+  });
+}
+
 function DashboardProducts() {
+  const { slug = '' } = useParams();
   const [items, setItems] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [selectedProductId, setSelectedProductId] = useState(null);
@@ -25,25 +50,13 @@ function DashboardProducts() {
   const [description, setDescription] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [available, setAvailable] = useState(true);
+  const [stock, setStock] = useState('');
+  const [hasTalla, setHasTalla] = useState(false);
   const [draftVariations, setDraftVariations] = useState([]);
-  const [draftVariationName, setDraftVariationName] = useState('');
-  const [draftVariationAttributes, setDraftVariationAttributes] = useState('');
-  const [draftVariationPrice, setDraftVariationPrice] = useState('');
-  const [draftVariationStock, setDraftVariationStock] = useState('');
-  const [draftVariationAvailable, setDraftVariationAvailable] = useState(true);
   const [variationItems, setVariationItems] = useState([]);
-  const [editingVariationId, setEditingVariationId] = useState(null);
-  const [variationName, setVariationName] = useState('');
-  const [variationAttributes, setVariationAttributes] = useState('');
-  const [variationPrice, setVariationPrice] = useState('');
-  const [variationStock, setVariationStock] = useState('');
-  const [variationAvailable, setVariationAvailable] = useState(true);
   const [status, setStatus] = useState('');
-  const [variationStatus, setVariationStatus] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoadingVariations, setIsLoadingVariations] = useState(false);
-  const [isSubmittingVariation, setIsSubmittingVariation] = useState(false);
 
   useEffect(() => {
     loadItems();
@@ -66,18 +79,17 @@ function DashboardProducts() {
   const loadVariations = async (productId) => {
     if (!productId) {
       setVariationItems([]);
-      return;
+      return [];
     }
 
-    setIsLoadingVariations(true);
     try {
       const data = await getProductVariations(productId);
-      setVariationItems(data.map(mapProductVariant));
-      setVariationStatus('');
+      const mapped = data.map(mapProductVariant);
+      setVariationItems(mapped);
+      return mapped;
     } catch (error) {
-      setVariationStatus(error.message || 'No se pudieron cargar las variaciones.');
-    } finally {
-      setIsLoadingVariations(false);
+      setStatus(error.message || 'No se pudieron cargar las variaciones.');
+      return [];
     }
   };
 
@@ -88,25 +100,28 @@ function DashboardProducts() {
     setDescription('');
     setImageFile(null);
     setAvailable(true);
-    resetDraftVariationForm();
+    setStock('');
+    setHasTalla(false);
     setDraftVariations([]);
+    setSelectedProductId(null);
+    setVariationItems([]);
   };
 
-  const resetDraftVariationForm = () => {
-    setDraftVariationName('');
-    setDraftVariationAttributes('');
-    setDraftVariationPrice('');
-    setDraftVariationStock('');
-    setDraftVariationAvailable(true);
+  const addDraftVariationRow = () => {
+    setDraftVariations((current) => [...current, createDraftVariationRow(current.length)]);
   };
 
-  const resetVariationForm = () => {
-    setEditingVariationId(null);
-    setVariationName('');
-    setVariationAttributes('');
-    setVariationPrice('');
-    setVariationStock('');
-    setVariationAvailable(true);
+  const updateDraftVariationRow = (tempId, field, value) => {
+    setDraftVariations((current) =>
+      current.map((row) => (row.tempId === tempId ? { ...row, [field]: value } : row))
+    );
+  };
+
+  const removeDraftVariationRow = (tempId) => {
+    setDraftVariations((current) => {
+      const next = current.filter((row) => row.tempId !== tempId);
+      return next.length > 0 ? next : [createDraftVariationRow(0)];
+    });
   };
 
   const handleSubmit = async (event) => {
@@ -115,11 +130,14 @@ function DashboardProducts() {
     setIsSubmitting(true);
     setStatus('');
 
+    const productHasTalla = hasTalla;
     const payload = {
       nombre: name,
       descripcion: description,
       precio: Number(price) || 0,
       disponible: available,
+      stock: productHasTalla ? 0 : Number(stock) || 0,
+      tieneTalla: productHasTalla,
       imagenFile: imageFile || undefined,
     };
 
@@ -128,27 +146,50 @@ function DashboardProducts() {
         ? await updateDashboardProduct(editingId, payload)
         : await createDashboardProduct(payload);
 
-      if (!editingId && savedProduct?.id && draftVariations.length > 0) {
-        await Promise.all(
-          draftVariations.map((variation) =>
-            createProductVariation(savedProduct.id, {
-              nombre: variation.name,
-              precio: variation.price,
-              stock: variation.stock,
-              disponible: variation.available,
-              atributos: variation.attributes,
-            })
-          )
-        );
+      if (savedProduct?.id && productHasTalla) {
+        const rows = draftVariations.length > 0 ? draftVariations : [createDraftVariationRow(0)];
+        const currentVariationIds = new Set((editingId ? variationItems : []).map((variation) => variation.id));
+        const submittedVariationIds = new Set();
+
+        for (const row of rows) {
+          const variationPayload = {
+            nombre: row.name.trim(),
+            stock: Number(row.stock) || 0,
+            disponible: row.available !== false,
+          };
+
+          if (row.variationId) {
+            await updateProductVariation(savedProduct.id, row.variationId, variationPayload);
+            submittedVariationIds.add(row.variationId);
+          } else {
+            const createdVariation = await createProductVariation(savedProduct.id, variationPayload);
+            if (createdVariation?.id) {
+              submittedVariationIds.add(createdVariation.id);
+            }
+          }
+        }
+
+        const variationsToDelete = [...currentVariationIds].filter((variationId) => !submittedVariationIds.has(variationId));
+        if (variationsToDelete.length > 0) {
+          await Promise.all(variationsToDelete.map((variationId) => deleteProductVariation(savedProduct.id, variationId)));
+        }
+      }
+
+      if (editingId && savedProduct?.id && !productHasTalla && variationItems.length > 0) {
+        await Promise.all(variationItems.map((variation) => deleteProductVariation(savedProduct.id, variation.id)));
       }
 
       await loadItems();
       setStatus(editingId ? 'Producto actualizado.' : 'Producto agregado.');
       resetForm();
 
-      if (savedProduct?.id) {
-        setSelectedProductId(savedProduct.id);
-        await loadVariations(savedProduct.id);
+      if (savedProduct?.id && productHasTalla) {
+        const refreshedVariations = await loadVariations(savedProduct.id);
+        setDraftVariations(
+          refreshedVariations.length > 0
+            ? refreshedVariations.map((variation, index) => mapDraftVariationFromApi(variation, index))
+            : [createDraftVariationRow(0)]
+        );
       }
     } catch (error) {
       setStatus(error.message || 'No se pudo guardar el producto.');
@@ -157,46 +198,30 @@ function DashboardProducts() {
     }
   };
 
-  const startEdit = (item) => {
+  const startEdit = async (item) => {
     setEditingId(item.id);
+    setSelectedProductId(item.id);
     setName(item.name ?? '');
     setPrice(String(item.price ?? 0));
     setDescription(item.description ?? '');
     setImageFile(null);
     setAvailable(item.available !== false);
-    setDraftVariations([]);
-    resetDraftVariationForm();
-    setStatus('Editando producto.');
-  };
+    setStock(String(item.stock ?? 0));
+    setHasTalla(Boolean(item.hasTalla));
 
-  const handleDraftVariationAdd = () => {
-    if (!draftVariationName.trim()) {
-      setStatus('Agrega un nombre para la variacion inicial.');
-      return;
+    if (item.hasTalla) {
+      const loadedVariations = await loadVariations(item.id);
+      setDraftVariations(
+        loadedVariations.length > 0
+          ? loadedVariations.map((variation, index) => mapDraftVariationFromApi(variation, index))
+          : [createDraftVariationRow(0)]
+      );
+    } else {
+      setDraftVariations([]);
+      setVariationItems([]);
     }
 
-    const nextVariation = {
-      id: Date.now(),
-      name: draftVariationName.trim(),
-      attributes: draftVariationAttributes.trim(),
-      price: Number(draftVariationPrice) || 0,
-      stock: Number(draftVariationStock) || 0,
-      available: draftVariationAvailable,
-    };
-
-    setDraftVariations((current) => [...current, nextVariation]);
-    setStatus('');
-    resetDraftVariationForm();
-  };
-
-  const handleDraftVariationRemove = (variationId) => {
-    setDraftVariations((current) => current.filter((variation) => variation.id !== variationId));
-  };
-
-  const openVariations = async (productId) => {
-    setSelectedProductId(productId);
-    resetVariationForm();
-    await loadVariations(productId);
+    setStatus('Editando producto.');
   };
 
   const handleDelete = async (id) => {
@@ -213,7 +238,6 @@ function DashboardProducts() {
       if (selectedProductId === id) {
         setSelectedProductId(null);
         setVariationItems([]);
-        resetVariationForm();
       }
       setStatus('Producto eliminado.');
     } catch (error) {
@@ -221,77 +245,15 @@ function DashboardProducts() {
     }
   };
 
-  const startVariationEdit = (variation) => {
-    setEditingVariationId(variation.id);
-    setVariationName(variation.name ?? '');
-    setVariationAttributes(variation.attributes ?? '');
-    setVariationPrice(String(variation.price ?? 0));
-    setVariationStock(String(variation.stock ?? 0));
-    setVariationAvailable(variation.available !== false);
-    setVariationStatus('Editando variacion.');
-  };
-
-  const handleVariationSubmit = async (event) => {
-    event.preventDefault();
-    if (!selectedProductId) {
-      setVariationStatus('Selecciona un producto antes de gestionar variaciones.');
-      return;
-    }
-
-    setIsSubmittingVariation(true);
-    setVariationStatus('');
-
-    const payload = {
-      nombre: variationName,
-      precio: Number(variationPrice) || 0,
-      stock: Number(variationStock) || 0,
-      disponible: variationAvailable,
-      atributos: variationAttributes,
-    };
-
-    try {
-      if (editingVariationId) {
-        await updateProductVariation(selectedProductId, editingVariationId, payload);
-        setVariationStatus('Variacion actualizada.');
-      } else {
-        await createProductVariation(selectedProductId, payload);
-        setVariationStatus('Variacion agregada.');
-      }
-
-      await loadVariations(selectedProductId);
-      await loadItems();
-      resetVariationForm();
-    } catch (error) {
-      setVariationStatus(error.message || 'No se pudo guardar la variacion.');
-    } finally {
-      setIsSubmittingVariation(false);
-    }
-  };
-
-  const handleVariationDelete = async (variationId) => {
-    if (!selectedProductId) {
-      return;
-    }
-
-    const shouldDelete = window.confirm('Estas seguro de eliminar esta variacion?');
-    if (!shouldDelete) {
-      return;
-    }
-
-    try {
-      await deleteProductVariation(selectedProductId, variationId);
-      await loadVariations(selectedProductId);
-      await loadItems();
-      if (editingVariationId === variationId) {
-        resetVariationForm();
-      }
-      setVariationStatus('Variacion eliminada.');
-    } catch (error) {
-      setVariationStatus(error.message || 'No se pudo eliminar la variacion.');
-    }
-  };
-
-  const selectedProduct = items.find((item) => item.id === selectedProductId) ?? null;
+  if (isLoading) {
+    return (
+      <main className="bp-page manage-page">
+        <NavBar />
+        <LoadingState label="Cargando productos..." />
+        <Footer />
+      </main>
+    );
+  }
 
   return (
     <main className="bp-page manage-page">
@@ -304,6 +266,11 @@ function DashboardProducts() {
           <p className="manage-subtitle">
             Administra productos e inventario por variaciones desde los endpoints reales del catalogo.
           </p>
+          <div className="manage-top-actions">
+            <Link to={`/${slug}/dashboard`} className="bp-btn bp-btn-small bp-btn-ghost">
+              Volver al dashboard
+            </Link>
+          </div>
         </div>
 
         <div className="bp-container manage-layout">
@@ -328,99 +295,95 @@ function DashboardProducts() {
                 onChange={(e) => setDescription(e.target.value)}
               />
               <label className="bp-meta">
-                <input
-                  type="checkbox"
-                  checked={available}
-                  onChange={(e) => setAvailable(e.target.checked)}
-                />{' '}
+                <input type="checkbox" checked={available} onChange={(e) => setAvailable(e.target.checked)} />{' '}
                 Disponible
               </label>
+              <input className="bp-field" type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] ?? null)} />
               <input
                 className="bp-field"
-                type="file"
-                accept="image/*"
-                onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+                type="number"
+                min="0"
+                step="1"
+                placeholder={hasTalla ? 'Stock general deshabilitado' : 'Stock general'}
+                value={stock}
+                onChange={(e) => setStock(e.target.value)}
+                disabled={hasTalla}
+                required={!hasTalla}
               />
+              <label className="bp-meta">
+                <input
+                  type="checkbox"
+                  checked={hasTalla}
+                  onChange={(e) => {
+                    const nextHasTalla = e.target.checked;
+                    setHasTalla(nextHasTalla);
+                    if (nextHasTalla) {
+                      setStock('');
+                      setDraftVariations((current) =>
+                        current.length > 0 ? current : [createDraftVariationRow(0)]
+                      );
+                    } else {
+                      setDraftVariations([]);
+                    }
+                  }}
+                />{' '}
+                Tiene talla
+              </label>
 
-              {!editingId ? (
-                <div className="bp-contact-panel">
-                  <h3 className="bp-about-title">Variaciones iniciales</h3>
-                  <div className="manage-form">
-                    <input
-                      className="bp-field"
-                      placeholder="Nombre de la variacion"
-                      value={draftVariationName}
-                      onChange={(e) => setDraftVariationName(e.target.value)}
-                    />
-                    <input
-                      className="bp-field"
-                      placeholder="Atributos"
-                      value={draftVariationAttributes}
-                      onChange={(e) => setDraftVariationAttributes(e.target.value)}
-                    />
-                    <input
-                      className="bp-field"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      placeholder="Precio de variacion"
-                      value={draftVariationPrice}
-                      onChange={(e) => setDraftVariationPrice(e.target.value)}
-                    />
-                    <input
-                      className="bp-field"
-                      type="number"
-                      min="0"
-                      step="1"
-                      placeholder="Stock de variacion"
-                      value={draftVariationStock}
-                      onChange={(e) => setDraftVariationStock(e.target.value)}
-                    />
-                    <label className="bp-meta">
-                      <input
-                        type="checkbox"
-                        checked={draftVariationAvailable}
-                        onChange={(e) => setDraftVariationAvailable(e.target.checked)}
-                      />{' '}
-                      Variacion disponible
-                    </label>
-                    <div className="manage-actions">
-                      <button type="button" className="bp-btn bp-btn-small bp-btn-ghost" onClick={handleDraftVariationAdd}>
-                        Agregar variacion inicial
-                      </button>
-                    </div>
+              {hasTalla ? (
+                <div className="manage-variant-box">
+                  <div className="manage-variant-builder-head">
+                    <h3 className="bp-about-title">Tallas</h3>
+                    <p className="bp-meta">El stock general queda deshabilitado. Cada talla usa su propio stock.</p>
                   </div>
 
-                  {draftVariations.length > 0 ? (
-                    <div className="manage-list">
-                      {draftVariations.map((variation) => (
-                        <article className="manage-item" key={variation.id}>
-                          <div className="manage-item-image" aria-hidden="true" />
-                          <div className="manage-item-copy">
-                            <strong>{variation.name}</strong>
-                            <p className="bp-meta">{variation.attributes || 'Sin atributos'}</p>
-                            <p className="bp-meta">Q{variation.price.toFixed(2)}</p>
-                            <p className="bp-meta">Stock: {variation.stock}</p>
-                            <p className="bp-meta">{variation.available ? 'Disponible' : 'No disponible'}</p>
-                            <div className="manage-actions">
-                              <button
-                                type="button"
-                                className="bp-btn bp-btn-small bp-btn-ghost"
-                                onClick={() => handleDraftVariationRemove(variation.id)}
-                              >
-                                Quitar
-                              </button>
-                            </div>
-                          </div>
-                        </article>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="bp-meta">Puedes crear el producto con sus variaciones y stock desde este mismo formulario.</p>
-                  )}
+                  <div className="manage-variant-list">
+                    {draftVariations.map((variation) => (
+                      <div className="manage-variant-row" key={variation.tempId}>
+                        <div className="manage-variant-top">
+                          <input
+                            className="bp-field"
+                            placeholder="Talla"
+                            value={variation.name}
+                            onChange={(e) => updateDraftVariationRow(variation.tempId, 'name', e.target.value)}
+                            required
+                          />
+                          <input
+                            className="bp-field"
+                            type="number"
+                            min="0"
+                            step="1"
+                            placeholder="Stock"
+                            value={variation.stock}
+                            onChange={(e) => updateDraftVariationRow(variation.tempId, 'stock', e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div className="manage-variant-bottom">
+                          <label className="bp-meta manage-variant-switch">
+                            <input
+                              type="checkbox"
+                              checked={variation.available}
+                              onChange={(e) => updateDraftVariationRow(variation.tempId, 'available', e.target.checked)}
+                            />{' '}
+                            Disponible
+                          </label>
+                          <button type="button" className="bp-btn bp-btn-small bp-btn-ghost" onClick={() => removeDraftVariationRow(variation.tempId)}>
+                            Quitar talla
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="manage-actions">
+                    <button type="button" className="bp-btn bp-btn-small bp-btn-ghost" onClick={addDraftVariationRow}>
+                      Agregar talla
+                    </button>
+                  </div>
                 </div>
               ) : (
-                <p className="bp-meta">Las variaciones existentes se administran en el panel inferior del producto seleccionado.</p>
+                <p className="bp-meta">El producto se guardará con stock general y sin variaciones.</p>
               )}
 
               <div className="manage-actions">
@@ -439,25 +402,22 @@ function DashboardProducts() {
 
           <article className="bp-contact-panel">
             <h2 className="bp-about-title">Productos ({items.length})</h2>
-            {isLoading ? <p className="bp-meta">Cargando productos...</p> : null}
             <div className="manage-list">
               {items.map((item) => (
                 <article className="manage-item" key={item.id}>
-                  {item.image ? (
-                    <img src={item.image} alt={item.name} className="manage-item-image" />
-                  ) : (
-                    <div className="manage-item-image" aria-hidden="true" />
-                  )}
+                  {item.image ? <img src={item.image} alt={item.name} className="manage-item-image" /> : <div className="manage-item-image" aria-hidden="true" />}
                   <div className="manage-item-copy">
                     <strong>{item.name}</strong>
                     <p className="bp-meta">{item.available ? 'Disponible' : 'No disponible'}</p>
                     <p className="bp-meta">Q{Number(item.price ?? 0).toFixed(2)}</p>
+                    <p className="bp-meta">Stock: {Number(item.stock ?? 0)}</p>
+                    <p className="bp-meta">{item.hasTalla ? 'Con tallas' : 'Stock general'}</p>
                     <p className="bp-meta">Variaciones: {item.variants?.length ?? 0}</p>
                     <p className="bp-meta">{item.description}</p>
                     <div className="manage-actions">
-                      <button type="button" className="bp-btn bp-btn-small" onClick={() => openVariations(item.id)}>
-                        Variaciones
-                      </button>
+                      <Link to={`/${slug}/store/product/${item.id ?? item.uuid}`} className="bp-btn bp-btn-small">
+                        Ver producto
+                      </Link>
                       <button type="button" className="bp-btn bp-btn-small bp-btn-ghost" onClick={() => startEdit(item)}>
                         Editar
                       </button>
@@ -469,112 +429,6 @@ function DashboardProducts() {
                 </article>
               ))}
             </div>
-          </article>
-        </div>
-
-        <div className="bp-container" style={{ marginTop: '1rem' }}>
-          <article className="bp-contact-panel">
-            <h2 className="bp-about-title">
-              {selectedProduct ? `Variaciones de ${selectedProduct.name}` : 'Variaciones'}
-            </h2>
-
-            {!selectedProduct ? (
-              <p className="bp-meta">Selecciona un producto para administrar sus variaciones.</p>
-            ) : (
-              <>
-                <form className="manage-form" onSubmit={handleVariationSubmit}>
-                  <input
-                    className="bp-field"
-                    placeholder="Nombre de la variacion"
-                    value={variationName}
-                    onChange={(e) => setVariationName(e.target.value)}
-                    required
-                  />
-                  <input
-                    className="bp-field"
-                    placeholder="Atributos"
-                    value={variationAttributes}
-                    onChange={(e) => setVariationAttributes(e.target.value)}
-                  />
-                  <input
-                    className="bp-field"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    placeholder="Precio"
-                    value={variationPrice}
-                    onChange={(e) => setVariationPrice(e.target.value)}
-                    required
-                  />
-                  <input
-                    className="bp-field"
-                    type="number"
-                    min="0"
-                    step="1"
-                    placeholder="Stock"
-                    value={variationStock}
-                    onChange={(e) => setVariationStock(e.target.value)}
-                    required
-                  />
-                  <label className="bp-meta">
-                    <input
-                      type="checkbox"
-                      checked={variationAvailable}
-                      onChange={(e) => setVariationAvailable(e.target.checked)}
-                    />{' '}
-                    Disponible
-                  </label>
-                  <div className="manage-actions">
-                    <button type="submit" className="bp-btn bp-btn-small" disabled={isSubmittingVariation}>
-                      {isSubmittingVariation
-                        ? 'Guardando...'
-                        : editingVariationId
-                          ? 'Guardar variacion'
-                          : 'Agregar variacion'}
-                    </button>
-                    {editingVariationId ? (
-                      <button type="button" className="bp-btn bp-btn-small bp-btn-ghost" onClick={resetVariationForm}>
-                        Cancelar
-                      </button>
-                    ) : null}
-                  </div>
-                </form>
-
-                <p className="manage-status">{variationStatus}</p>
-                {isLoadingVariations ? <p className="bp-meta">Cargando variaciones...</p> : null}
-
-                <div className="manage-list">
-                  {variationItems.map((variation) => (
-                    <article className="manage-item" key={variation.id}>
-                      <div className="manage-item-image" aria-hidden="true" />
-                      <div className="manage-item-copy">
-                        <strong>{variation.name}</strong>
-                        <p className="bp-meta">{variation.attributes || 'Sin atributos'}</p>
-                        <p className="bp-meta">Q{variation.price.toFixed(2)}</p>
-                        <p className="bp-meta">Stock: {variation.stock}</p>
-                        <p className="bp-meta">{variation.available ? 'Disponible' : 'No disponible'}</p>
-                        <div className="manage-actions">
-                          <button
-                            type="button"
-                            className="bp-btn bp-btn-small bp-btn-ghost"
-                            onClick={() => startVariationEdit(variation)}
-                          >
-                            Editar
-                          </button>
-                          <button
-                            type="button"
-                            className="bp-btn bp-btn-small bp-btn-ghost"
-                            onClick={() => handleVariationDelete(variation.id)}
-                          >
-                            Eliminar
-                          </button>
-                        </div>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              </>
-            )}
           </article>
         </div>
       </section>

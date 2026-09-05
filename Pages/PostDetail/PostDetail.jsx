@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import NavBar from '../../Components/NavBar/NavBar';
 import Footer from '../../Components/Footer/Footer';
+import LoadingState from '../../Components/LoadingState/LoadingState';
 import {
   getPublicPostDetail,
   mapPublicacionToDetail
@@ -39,11 +40,7 @@ function PostDetail() {
     return (
       <main className="bp-page post-detail-page">
         <NavBar />
-        <section className="bp-section" aria-label="Cargando noticia">
-          <div className="bp-section-header">
-            <p style={{ textAlign: 'center' }}>Cargando noticia...</p>
-          </div>
-        </section>
+        <LoadingState label="Cargando noticia..." />
         <Footer />
       </main>
     );

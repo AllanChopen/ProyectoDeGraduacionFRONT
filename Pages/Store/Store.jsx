@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import NavBar from '../../Components/NavBar/NavBar';
 import Footer from '../../Components/Footer/Footer';
+import LoadingState from '../../Components/LoadingState/LoadingState';
 import { getPublicProducts, mapProductoToCard } from '../../src/api/productosApi';
 import '../BandPublic/BandPublic.css';
 import '../BandPublic/Components/Products/Products.css';
@@ -10,15 +11,20 @@ import './store.css';
 function Store() {
 	const { slug } = useParams();
 	const [products, setProducts] = useState([]);
+	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
 		const loadProducts = async () => {
 			try {
+				setLoading(true);
 				const data = await getPublicProducts(slug);
 				const mappedProducts = data.map((product) => mapProductoToCard(product));
 				setProducts(mappedProducts);
 			} catch (error) {
 				console.error('Error loading products:', error);
+				setProducts([]);
+			} finally {
+				setLoading(false);
 			}
 		};
 
@@ -26,6 +32,16 @@ function Store() {
 			loadProducts();
 		}
 	}, [slug]);
+
+	if (loading) {
+		return (
+			<main className="bp-page store-page">
+				<NavBar />
+				<LoadingState label="Cargando tienda..." />
+				<Footer />
+			</main>
+		);
+	}
 
 	return (
 		<main className="bp-page store-page">

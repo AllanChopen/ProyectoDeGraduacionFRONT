@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import NavBar from '../../Components/NavBar/NavBar';
 import Footer from '../../Components/Footer/Footer';
+import LoadingState from '../../Components/LoadingState/LoadingState';
 import { getPublicEventDetail, mapEventoToDetail } from '../../src/api/eventosApi';
 import { useCart } from '../../src/context/CartContext';
 import '../BandPublic/BandPublic.css';
@@ -59,11 +60,7 @@ function ShowDetail() {
     return (
       <main className="bp-page show-detail-page">
         <NavBar />
-        <section className="bp-section" aria-label="Cargando show">
-          <div className="bp-section-header">
-            <p style={{ textAlign: 'center' }}>Cargando show...</p>
-          </div>
-        </section>
+        <LoadingState label="Cargando show..." />
         <Footer />
       </main>
     );
@@ -124,6 +121,12 @@ function ShowDetail() {
           <p className="show-type">Tickets</p>
           <h1 className="bp-section-title show-title">{show.title}</h1>
           <p className="show-description">{show.description}</p>
+
+          <div className="show-top-actions">
+            <Link to={`/${slug}/shows`} className="bp-btn bp-btn-small bp-btn-ghost">
+              Regresar a shows
+            </Link>
+          </div>
 
           <div className="show-meta-grid">
             <p className="bp-meta">Lugar: {show.venue}</p>

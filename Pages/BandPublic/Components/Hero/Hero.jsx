@@ -1,7 +1,7 @@
 import './Hero.css';
 
 function Hero({ title, subtitle, image }) {
-  const heroBackground = `radial-gradient(circle at 70% 15%, rgba(242, 111, 68, 0.45), transparent 42%), linear-gradient(130deg, rgba(9, 9, 10, 0.8), rgba(9, 9, 10, 0.65)), url(${image})`;
+  const heroBackground = `radial-gradient(circle at 70% 15%, rgba(242, 111, 68, 0.45), transparent 42%), linear-gradient(130deg, rgba(9, 9, 10, 0.8), rgba(9, 9, 10, 0.65)), url("${image}")`;
 
   return (
     <section

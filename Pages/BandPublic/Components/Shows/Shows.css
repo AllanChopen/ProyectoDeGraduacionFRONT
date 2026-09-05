@@ -1,5 +1,6 @@
 .bp-shows {
-  margin-top: 2rem;
+  margin-top: 0;
+  padding-top: clamp(1rem, 2.6vw, 1.5rem);
 }
 
 .bp-show-card {

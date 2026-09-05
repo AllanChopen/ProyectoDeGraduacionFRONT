@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import Footer from '../../Components/Footer/Footer';
+import LoadingState from '../../Components/LoadingState/LoadingState';
 import NavBar from '../../Components/NavBar/NavBar';
 import {
   createDashboardPost,
@@ -27,6 +29,7 @@ function mapPostToItem(post) {
 }
 
 function DashboardBlog() {
+  const { slug = '' } = useParams();
   const [items, setItems] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [title, setTitle] = useState('');
@@ -59,6 +62,16 @@ function DashboardBlog() {
   useEffect(() => {
     loadItems();
   }, []);
+
+  if (isLoading) {
+    return (
+      <main className="bp-page manage-page">
+        <NavBar />
+        <LoadingState label="Cargando publicaciones..." />
+        <Footer />
+      </main>
+    );
+  }
 
   const resetForm = () => {
     setEditingId(null);
@@ -133,6 +146,11 @@ function DashboardBlog() {
           <p className="manage-subtitle">
             Crea y administra noticias con su contenido, fecha e imagen desde el endpoint de publicaciones.
           </p>
+          <div className="manage-top-actions">
+            <Link to={`/${slug}/dashboard`} className="bp-btn bp-btn-small bp-btn-ghost">
+              Volver al dashboard
+            </Link>
+          </div>
         </div>
 
         <div className="bp-container manage-layout">
@@ -169,7 +187,6 @@ function DashboardBlog() {
 
           <article className="bp-contact-panel">
             <h2 className="bp-about-title">Noticias ({items.length})</h2>
-            {isLoading ? <p className="bp-meta">Cargando publicaciones...</p> : null}
             <div className="manage-list">
               {items.map((item) => (
                 <article className="manage-item" key={item.id}>
@@ -181,8 +198,11 @@ function DashboardBlog() {
                   <div className="manage-item-copy">
                     <strong>{item.title}</strong>
                     <p className="bp-meta">{formatDateLabel(item.date)}</p>
-                    <p className="bp-meta">{item.excerpt}</p>
+                    <p className="bp-meta manage-item-description">{item.excerpt}</p>
                     <div className="manage-actions">
+                      <Link to={`/${slug}/blog/${item.id}`} className="bp-btn bp-btn-small">
+                        Ver noticia completa
+                      </Link>
                       <button type="button" className="bp-btn bp-btn-small bp-btn-ghost" onClick={() => startEdit(item)}>
                         Editar
                       </button>

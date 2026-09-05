@@ -38,9 +38,9 @@
 
 .bp-hero-title {
   margin: 0;
-  font-family: 'Flying Hollander', system-ui, sans-serif;
+  font-family: system-ui, 'Segoe UI', sans-serif;
   font-size: clamp(2.8rem, 10vw, 6.4rem);
-  font-weight: 400;
+  font-weight: 800;
   letter-spacing: 0.02em;
   line-height: 1.05;
   background: var(--bp-gradient-brand);

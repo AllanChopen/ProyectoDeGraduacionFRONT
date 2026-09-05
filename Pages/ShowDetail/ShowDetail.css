@@ -50,6 +50,10 @@
   line-height: 1.6;
 }
 
+.show-top-actions {
+  margin: 0.2rem 0 1rem;
+}
+
 .show-meta-grid {
   display: grid;
   gap: 0.35rem;

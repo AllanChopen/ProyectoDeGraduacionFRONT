@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import NavBar from '../../Components/NavBar/NavBar';
 import Footer from '../../Components/Footer/Footer';
+import LoadingState from '../../Components/LoadingState/LoadingState';
 import { getPublicPosts, mapPublicacionToCard } from '../../src/api/publicacionesApi';
 import '../BandPublic/BandPublic.css';
 import '../BandPublic/Components/Posts/Posts.css';
@@ -31,6 +32,16 @@ function Blog() {
     }
   }, [slug]);
 
+  if (loading) {
+    return (
+      <main className="bp-page blog-page">
+        <NavBar />
+        <LoadingState label="Cargando blog..." />
+        <Footer />
+      </main>
+    );
+  }
+
   return (
     <main className="bp-page blog-page">
       <NavBar />
@@ -52,9 +63,7 @@ function Blog() {
 
       <section className="bp-section" aria-label="Listado completo de publicaciones">
         <div className="bp-container blog-grid">
-          {loading ? (
-            <p style={{ gridColumn: '1 / -1', textAlign: 'center' }}>Cargando posts...</p>
-          ) : posts.length > 0 ? (
+          {posts.length > 0 ? (
             posts.map((post) => (
             <article className="bp-post-card blog-post-card" key={post.id}>
               {post.image ? (

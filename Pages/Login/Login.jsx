@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../src/context/AuthContext';
 import './Login.css';
 
@@ -10,6 +10,7 @@ function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -17,8 +18,15 @@ function Login() {
     setIsSubmitting(true);
 
     try {
-      await login(email, password);
-      navigate('/dashboard', { replace: true });
+      const authData = await login(email, password);
+      const bandSlug = authData?.band?.slug;
+
+      if (bandSlug) {
+        navigate(`/${bandSlug}/dashboard`, { replace: true });
+        return;
+      }
+
+      navigate(location.state?.from || '/', { replace: true });
     } catch {
       setError('Correo o contrasena incorrectos.');
     } finally {
