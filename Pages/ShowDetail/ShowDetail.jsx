@@ -1,19 +1,19 @@
 import { useMemo, useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import NavBar from '../../Components/NavBar/NavBar';
 import Footer from '../../Components/Footer/Footer';
 import LoadingState from '../../Components/LoadingState/LoadingState';
 import { getPublicEventDetail, mapEventoToDetail } from '../../src/api/eventosApi';
-import { useCart } from '../../src/context/CartContext';
+import { calcularPrecioEvento } from '../../src/utils/eventPricing';
 import '../BandPublic/BandPublic.css';
 import './ShowDetail.css';
 
 function ShowDetail() {
   const { slug, showId } = useParams();
+  const navigate = useNavigate();
   const [show, setShow] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const { addTicketItem } = useCart();
 
   useEffect(() => {
     const loadShow = async () => {
@@ -42,14 +42,13 @@ function ShowDetail() {
           id: `show-${show?.id}-general`,
           label: 'General',
           price: show?.price ?? 0,
-          stock: show?.capacity ?? 1
+          stock: show?.availableTickets ?? 0
         }
       ];
 
   const defaultTicketType = ticketTypes[0] ?? null;
   const [selectedTicketId, setSelectedTicketId] = useState(defaultTicketType?.id ?? '');
   const [quantity, setQuantity] = useState(1);
-  const [feedback, setFeedback] = useState('');
 
   const selectedTicket = useMemo(() => {
     if (!show) return null;
@@ -87,22 +86,14 @@ function ShowDetail() {
     );
   }
 
-  const handleAddTicket = () => {
+  const handleProceedToCheckout = () => {
     if (!selectedTicket) return;
-
-    addTicketItem({
-      showId: show.id,
-      name: show.title,
-      variantId: selectedTicket.id,
-      variantLabel: selectedTicket.label,
-      unitPrice: selectedTicket.price,
-      quantity
+    navigate(`/${slug}/checkout/${show.id}`, {
+      state: { show, ticketPrice: selectedTicket.price, quantity }
     });
-
-    setFeedback('Tickets agregados al carrito.');
   };
 
-  const total = selectedTicket ? selectedTicket.price * quantity : 0;
+  const precio = selectedTicket ? calcularPrecioEvento(selectedTicket.price, quantity) : null;
 
   return (
     <main className="bp-page show-detail-page">
@@ -183,13 +174,17 @@ function ShowDetail() {
           </div>
 
           <div className="show-price-wrap">
-            <p className="bp-price show-price">Q{selectedTicket?.price.toFixed(2)}</p>
-            <p className="show-total">Total: Q{total.toFixed(2)}</p>
+            <div className="show-price-breakdown">
+              <p><span>Q{selectedTicket?.price.toFixed(2)}</span><span>{quantity} × entrada</span></p>
+              <p><span>Q{precio?.subtotal.toFixed(2)}</span><span>Subtotal</span></p>
+              <p><span>Q{precio?.tarifaServicio.toFixed(2)}</span><span>Tarifa de servicio</span></p>
+              <strong><span>Q{precio?.total.toFixed(2)}</span><span>Total</span></strong>
+            </div>
           </div>
 
           <div className="show-actions">
-            <button type="button" className="bp-btn" onClick={handleAddTicket}>
-              Anadir tickets
+            <button type="button" className="bp-btn" onClick={handleProceedToCheckout}>
+              Proceder con la compra
             </button>
             {show.mapsUrl ? (
               <a
@@ -201,17 +196,11 @@ function ShowDetail() {
                 Ver Google Maps
               </a>
             ) : null}
-            <Link to="/carrito-tickets" className="bp-btn">
-              Ver carrito tickets
-            </Link>
             <Link to={`/${slug}/shows`} className="bp-btn bp-btn-ghost">
               Ver mas shows
             </Link>
           </div>
 
-          <p className="show-feedback" role="status">
-            {feedback}
-          </p>
         </article>
       </section>
 

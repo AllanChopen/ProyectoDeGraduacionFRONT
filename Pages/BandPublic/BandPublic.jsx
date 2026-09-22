@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import './BandPublic.css';
 import LoadingState from '../../Components/LoadingState/LoadingState';
 import NavBar from '../../Components/NavBar/NavBar';
@@ -11,13 +11,14 @@ import Shows from './Components/Shows/Shows';
 import Posts from './Components/Posts/Posts';
 import Contact from './Components/Contact/Contact';
 import heroImage from '../../src/assets/hero.png';
-import { getPublicBand } from '../../src/api/bandApi';
+import { getPublicBand, mapBand } from '../../src/api/bandApi';
 import { getPublicEvents, mapEventoToCard, sortEventosForDisplay } from '../../src/api/eventosApi';
 import { getPublicPosts, mapPublicacionToCard } from '../../src/api/publicacionesApi';
 import { getPublicProducts, mapProductoToCard } from '../../src/api/productosApi';
 
 function BandPublic() {
   const { slug } = useParams();
+  const navigate = useNavigate();
   const [band, setBand] = useState(null);
   const [products, setProducts] = useState([]);
   const [shows, setShows] = useState([]);
@@ -35,8 +36,14 @@ function BandPublic() {
 
       setIsLoading(true);
       try {
-        const [bandData, productsData, eventsData, postsData] = await Promise.all([
-          getPublicBand(slug),
+        // Validate the band first so an invalid slug does not trigger requests
+        // for products, shows and posts that cannot belong to it.
+        const bandData = await getPublicBand(slug);
+        if (!bandData) {
+          navigate('/404', { replace: true });
+          return;
+        }
+        const [productsData, eventsData, postsData] = await Promise.all([
           getPublicProducts(slug),
           getPublicEvents(slug),
           getPublicPosts(slug),
@@ -46,7 +53,7 @@ function BandPublic() {
           return;
         }
 
-        setBand(bandData);
+        setBand(mapBand(bandData));
         setProducts((Array.isArray(productsData) ? productsData : []).map((product) => mapProductoToCard(product)));
         setShows(sortEventosForDisplay(Array.isArray(eventsData) ? eventsData : []).map(mapEventoToCard));
         setPosts((Array.isArray(postsData) ? postsData : []).map(mapPublicacionToCard));
@@ -55,6 +62,10 @@ function BandPublic() {
           return;
         }
         console.error('Error loading public page data:', error);
+        if (error?.message?.includes('404')) {
+          navigate('/404', { replace: true });
+          return;
+        }
         setBand(null);
         setProducts([]);
         setShows([]);
@@ -71,7 +82,7 @@ function BandPublic() {
     return () => {
       isMounted = false;
     };
-  }, [slug]);
+  }, [navigate, slug]);
 
   if (isLoading) {
     return (

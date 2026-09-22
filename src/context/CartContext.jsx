@@ -31,33 +31,54 @@ export function CartProvider({ children }) {
     localStorage.setItem(TICKET_CART_STORAGE_KEY, JSON.stringify(ticketItems));
   }, [ticketItems]);
 
-  const addMerchItem = ({ productId, name, variantId, variantLabel, unitPrice, quantity = 1 }) => {
+  const addMerchItem = ({ slug, productId, name, imageUrl, variantId, variantLabel, unitPrice, quantity = 1 }) => {
+    const parsedProductId = Number(productId);
+    const numericProductId = Number.isInteger(parsedProductId) && parsedProductId > 0 ? parsedProductId : null;
+    const numericVariantId = Number(variantId);
     setMerchItems((currentItems) => {
       const existingIndex = currentItems.findIndex(
-        (item) => item.productId === productId && item.variantId === variantId
+        (item) => (item.productId ?? item.productoId) === numericProductId
+          && (item.variantId ?? item.variacionId) === numericVariantId
       );
 
       if (existingIndex === -1) {
         return [
           ...currentItems,
           {
-            productId,
+            slug,
+            productId: numericProductId,
+            productoId: numericProductId,
             name,
-            variantId,
+            imageUrl,
+            variantId: Number.isNaN(numericVariantId) ? null : numericVariantId,
+            variacionId: Number.isNaN(numericVariantId) ? null : numericVariantId,
             variantLabel,
             unitPrice,
-            quantity
+            quantity,
+            cantidad: quantity,
           }
         ];
       }
 
       return currentItems.map((item, index) =>
-        index === existingIndex ? { ...item, quantity: item.quantity + quantity } : item
+        index === existingIndex
+          ? {
+              ...item,
+              slug: item.slug ?? slug,
+              imageUrl: item.imageUrl ?? imageUrl,
+              productId: item.productId ?? item.productoId ?? numericProductId,
+              productoId: item.productoId ?? item.productId ?? numericProductId,
+              variantId: item.variantId ?? item.variacionId ?? numericVariantId,
+              variacionId: item.variacionId ?? item.variantId ?? numericVariantId,
+              quantity: item.quantity + quantity,
+              cantidad: (item.cantidad ?? item.quantity) + quantity,
+            }
+          : item
       );
     });
   };
 
-  const addTicketItem = ({ showId, name, variantId, variantLabel, unitPrice, quantity = 1 }) => {
+  const addTicketItem = ({ eventoId, showId, name, poster, imageUrl, date, venue, precioEntrada, variantId, unitPrice, quantity = 1 }) => {
     setTicketItems((currentItems) => {
       const existingIndex = currentItems.findIndex(
         (item) => item.showId === showId && item.variantId === variantId
@@ -67,11 +88,12 @@ export function CartProvider({ children }) {
         return [
           ...currentItems,
           {
-            showId,
+            eventoId: eventoId ?? showId,
             name,
-            variantId,
-            variantLabel,
-            unitPrice,
+            imageUrl: imageUrl ?? poster,
+            date,
+            venue,
+            precioEntrada: Number(precioEntrada ?? unitPrice ?? 0),
             quantity
           }
         ];
@@ -88,7 +110,7 @@ export function CartProvider({ children }) {
       currentItems
         .map((item) =>
           item.productId === productId && item.variantId === variantId
-            ? { ...item, quantity: Math.max(1, quantity) }
+            ? { ...item, quantity: Math.max(1, quantity), cantidad: Math.max(1, quantity) }
             : item
         )
         .filter((item) => item.quantity > 0)

@@ -1,0 +1,10 @@
+.event-success-page { display: flex; flex-direction: column; }
+.event-success-header { text-align: center; margin-bottom: 1.5rem; }
+.event-success-header h1 { margin-bottom: .5rem; }
+.event-success-summary { width: min(760px, 92%); margin: 0 auto; display: grid; gap: .5rem; }
+.event-success-summary h2, .event-success-summary p { margin: 0; }
+.event-success-tickets { width: min(1000px, 92%); margin: 2rem auto; }
+.event-success-tickets > h2 { margin-bottom: 1rem; }
+.event-ticket-card { display: grid; justify-items: center; gap: .8rem; margin-bottom: 1rem; text-align: center; }
+.event-ticket-card h3, .event-ticket-card p { margin: 0; }
+.checkout-success-error { text-align: center; }

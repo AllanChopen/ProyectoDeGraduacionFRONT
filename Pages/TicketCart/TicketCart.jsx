@@ -2,13 +2,13 @@ import { Link } from 'react-router-dom';
 import NavBar from '../../Components/NavBar/NavBar';
 import Footer from '../../Components/Footer/Footer';
 import { useCart } from '../../src/context/CartContext';
+import { calcularPrecioEvento } from '../../src/utils/eventPricing';
 import '../BandPublic/BandPublic.css';
 import './TicketCart.css';
 
 function TicketCart() {
   const {
     ticketItems,
-    ticketSubtotal,
     updateTicketQuantity,
     removeTicketItem,
     clearTicketCart,
@@ -16,6 +16,12 @@ function TicketCart() {
   } = useCart();
 
   const isEmpty = ticketItems.length === 0;
+  const ticketPrices = ticketItems.map((item) => ({
+    ...item,
+    price: calcularPrecioEvento(item.precioEntrada ?? item.unitPrice, item.quantity),
+  }));
+  const ticketServiceFees = ticketPrices.reduce((sum, item) => sum + item.price.tarifaServicio, 0);
+  const ticketGrandTotal = ticketPrices.reduce((sum, item) => sum + item.price.total, 0);
 
   return (
     <main className="bp-page ticket-cart-page">
@@ -40,12 +46,21 @@ function TicketCart() {
         ) : (
           <div className="bp-container ticket-cart-layout">
             <div className="bp-contact-panel ticket-cart-items">
-              {ticketItems.map((item) => (
-                <article className="ticket-cart-item" key={`${item.showId}-${item.variantId}`}>
+              {ticketPrices.map((item) => (
+                <article className="ticket-cart-item" key={item.eventoId ?? item.showId}>
+                  {item.poster ? (
+                    <img src={item.poster} alt={item.name} className="ticket-cart-item-image" />
+                  ) : (
+                    <div className="ticket-cart-item-image bp-image-placeholder" aria-hidden="true" />
+                  )}
                   <div>
                     <strong>{item.name}</strong>
-                    <p className="bp-meta">Ticket: {item.variantLabel}</p>
-                    <p className="bp-meta">Q{item.unitPrice.toFixed(2)} c/u</p>
+                    <p className="bp-meta">Ticket general</p>
+                    {item.date ? <p className="bp-meta">{item.date}{item.venue ? ` · ${item.venue}` : ''}</p> : null}
+                    <p className="bp-meta">{item.quantity} × Q{Number(item.precioEntrada ?? item.unitPrice).toFixed(2)}</p>
+                    <p className="bp-meta">Subtotal: Q{item.price.subtotal.toFixed(2)}</p>
+                    <p className="bp-meta">Tarifa: Q{item.price.tarifaServicio.toFixed(2)}</p>
+                    <p className="ticket-cart-line-total">Total: Q{item.price.total.toFixed(2)}</p>
                   </div>
 
                   <div className="ticket-cart-item-actions">
@@ -75,7 +90,13 @@ function TicketCart() {
             <aside className="bp-contact-panel ticket-cart-summary">
               <h2 className="bp-about-title">Resumen</h2>
               <p className="bp-meta">Tickets: {ticketTotalItems}</p>
-              <p className="ticket-cart-total">Subtotal: Q{ticketSubtotal.toFixed(2)}</p>
+              <p className="ticket-cart-total">Subtotal: Q{ticketPrices.reduce((sum, item) => sum + item.price.subtotal, 0).toFixed(2)}</p>
+              <p className="bp-meta">Tarifa de servicio: Q{ticketServiceFees.toFixed(2)}</p>
+              <p className="ticket-cart-total">Total: Q{ticketGrandTotal.toFixed(2)}</p>
+              <button type="button" className="bp-btn ticket-cart-pay" disabled>
+                Listo para pagar
+              </button>
+              <p className="bp-meta ticket-cart-payment-note">El pago se conectará próximamente.</p>
               <button type="button" className="bp-btn" onClick={clearTicketCart}>
                 Vaciar carrito
               </button>

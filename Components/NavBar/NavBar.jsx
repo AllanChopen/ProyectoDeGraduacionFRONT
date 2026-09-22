@@ -7,7 +7,7 @@ import { useAuth } from '../../src/context/AuthContext';
 import { buildSocialLinksMap } from '../../src/utils/socialLinks';
 import './Navbar.css';
 
-const RESERVED_ROOTS = new Set(['', 'login', 'dashboard', 'carrito', 'carrito-tickets']);
+const RESERVED_ROOTS = new Set(['', '404', 'login', 'dashboard', 'carrito', 'carrito-tickets', 'tienda']);
 
 function getBandSlug(pathname) {
   const [firstSegment] = pathname.split('/').filter(Boolean);
@@ -151,7 +151,7 @@ function NavBar() {
       </Link>
 
       <div className="header-actions">
-        <Link to="/carrito" aria-label="Carrito de merch" className="header-cart" title="Carrito de merch">
+        <Link to={bandSlug ? `/${bandSlug}/carrito` : '/'} aria-label="Carrito de merch" className="header-cart" title="Carrito de merch">
           <img src="/icons/cart.svg" alt="Cart" className="cart-icon" />
           <span className="cart-count">{merchTotalItems}</span>
         </Link>

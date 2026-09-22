@@ -115,6 +115,31 @@
   color: var(--bp-text-muted);
 }
 
+.show-price-breakdown {
+	display: grid;
+	gap: 0.2rem;
+	color: var(--bp-text-muted);
+	text-align: left;
+	justify-items: start;
+}
+
+.show-price-breakdown p,
+.show-price-breakdown strong {
+	margin: 0;
+	display: grid;
+	grid-template-columns: 110px minmax(150px, auto);
+	column-gap: 1rem;
+	text-align: left;
+}
+
+.show-price-breakdown p span:first-child,
+.show-price-breakdown strong span:first-child { text-align: left; }
+
+.show-price-breakdown strong {
+	color: var(--bp-text);
+	font-size: 1.1rem;
+}
+
 .show-actions {
   margin-top: 1.2rem;
   display: flex;

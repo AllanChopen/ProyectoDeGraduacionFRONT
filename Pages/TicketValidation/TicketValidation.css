@@ -1,0 +1,7 @@
+.ticket-validation-section { width: min(760px, 92%); margin-inline: auto; }
+.ticket-validation-card { display: grid; gap: .7rem; }
+.ticket-validation-card h1, .ticket-validation-card h2, .ticket-validation-card p { margin: 0; }
+.ticket-validation-card h1 { color: var(--bp-text); }
+.ticket-is-valid { border-color: rgba(80, 190, 110, .55); }
+.ticket-is-used { border-color: rgba(220, 100, 100, .55); }
+.ticket-validation-error { text-align: center; }

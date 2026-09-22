@@ -105,6 +105,24 @@
   color: var(--bp-text-muted);
 }
 
+.product-price-breakdown {
+  display: grid;
+  gap: 0.35rem;
+  text-align: left;
+}
+
+.product-price-breakdown p,
+.product-price-breakdown strong {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  gap: 0.8rem;
+  margin: 0;
+}
+
+.product-price-breakdown strong {
+  color: var(--bp-text);
+}
+
 .product-actions {
   margin-top: 1.2rem;
   display: flex;

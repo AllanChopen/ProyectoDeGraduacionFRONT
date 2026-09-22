@@ -81,33 +81,45 @@ export const deleteProductVariation = async (productId, variationId) => {
 };
 
 export const mapProductVariant = (variant) => ({
-  id: variant?.id ?? variant?.uuid,
-  uuid: variant?.uuid,
-  productId: variant?.productoId ?? null,
-  label: variant?.nombre || 'Variacion',
-  name: variant?.nombre || 'Variacion',
-  stock: Number(variant?.stock ?? 0),
-  available: Boolean(variant?.disponible),
+  id: variant?.id ?? variant?.Id ?? variant?.ID ?? variant?.uuid ?? variant?.Uuid ?? variant?.UUID,
+  uuid: variant?.uuid ?? variant?.Uuid ?? variant?.UUID,
+  productId: variant?.productoId ?? variant?.ProductoId ?? variant?.ProductoID ?? null,
+  label: variant?.nombre || variant?.Nombre || 'Variacion',
+  name: variant?.nombre || variant?.Nombre || 'Variacion',
+  stock: Number(variant?.stock ?? variant?.Stock ?? 0),
+  available: Boolean(variant?.disponible ?? variant?.Disponible),
 });
 
 export const mapProductoToCard = (product, fallbackId = null) => {
-  const variants = (product?.variaciones ?? []).map(mapProductVariant);
-  const hasSizes = Boolean(product?.tieneTalla);
+  const source = product?.producto ?? product?.Producto ?? product;
+  const idCandidates = [
+    source?.id,
+    source?.Id,
+    source?.ID,
+    source?.productoId,
+    source?.ProductoId,
+    source?.ProductoID,
+    fallbackId,
+  ];
+  const rawId = idCandidates.find((value) => Number.isInteger(Number(value)) && Number(value) > 0);
+  const numericId = Number(rawId);
+  const variants = (source?.variaciones ?? source?.Variaciones ?? []).map(mapProductVariant);
+  const hasSizes = Boolean(source?.tieneTalla ?? source?.TieneTalla);
   const totalStock = hasSizes
     ? variants.reduce((sum, variant) => sum + Number(variant.stock ?? 0), 0)
-    : Number(product?.stock ?? variants.reduce((sum, variant) => sum + Number(variant.stock ?? 0), 0));
+    : Number(source?.stock ?? source?.Stock ?? variants.reduce((sum, variant) => sum + Number(variant.stock ?? 0), 0));
 
   return {
-    id: Number(product?.id ?? fallbackId ?? 0) || null,
-    uuid: product?.uuid,
-    name: product?.nombre || 'Sin nombre',
-    description: product?.descripcion || '',
-    price: Number(product?.precio ?? 0),
-    available: Boolean(product?.disponible),
+    id: Number.isInteger(numericId) && numericId > 0 ? numericId : null,
+    uuid: source?.uuid ?? source?.Uuid ?? source?.UUID,
+    name: source?.nombre || source?.Nombre || 'Sin nombre',
+    description: source?.descripcion || source?.Descripcion || '',
+    price: Number(source?.precio ?? source?.Precio ?? 0),
+    available: Boolean(source?.disponible ?? source?.Disponible),
     stock: totalStock,
     hasTalla: hasSizes,
     type: hasSizes ? 'Con tallas' : 'Stock general',
-    image: product?.imagenUrl || null,
+    image: source?.imagenUrl || source?.ImagenUrl || null,
     variants,
   };
 };

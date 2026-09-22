@@ -9,12 +9,15 @@ import {
   mapProductoToDetail
 } from '../../src/api/productosApi';
 import { useCart } from '../../src/context/CartContext';
+import { getPublicBand, mapBand } from '../../src/api/bandApi';
+import { calcularPrecioProductos } from '../../src/utils/productPricing';
 import '../BandPublic/BandPublic.css';
 import './ProductDetail.css';
 
 function ProductDetail() {
   const { slug, productId } = useParams();
   const [product, setProduct] = useState(null);
+  const [band, setBand] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const { addMerchItem } = useCart();
@@ -25,21 +28,26 @@ function ProductDetail() {
       setNotFound(false);
       try {
         const numericProductId = Number(productId);
+        const bandData = await getPublicBand(slug);
+        setBand(mapBand(bandData));
         if (Number.isInteger(numericProductId) && numericProductId > 0) {
           const data = await getPublicProductDetail(slug, numericProductId);
-          setProduct(mapProductoToDetail(data, numericProductId));
-          return;
+          const mappedProduct = mapProductoToDetail(data, numericProductId);
+          setProduct({ ...mappedProduct, id: numericProductId });
+        } else {
+          const list = await getPublicProducts(slug);
+          const selected = list.find((item) => item.uuid === productId);
+          if (!selected) throw new Error('Product not found');
+          console.log('PUBLIC PRODUCT RAW:', selected);
+          const mappedProduct = mapProductoToDetail(selected);
+          const variationProductId = mappedProduct.variants
+            .map((variant) => Number(variant.productId))
+            .find((id) => Number.isInteger(id) && id > 0);
+          setProduct({
+            ...mappedProduct,
+            id: mappedProduct.id ?? variationProductId ?? null,
+          });
         }
-
-        const list = await getPublicProducts(slug);
-        const selected = list.find((item) => item.uuid === productId);
-        if (!selected) {
-          setProduct(null);
-          setNotFound(true);
-          return;
-        }
-
-        setProduct(mapProductoToDetail(selected));
       } catch (error) {
         console.error('Error loading product detail:', error);
         setProduct(null);
@@ -120,10 +128,20 @@ function ProductDetail() {
   const handleAddToCart = () => {
     if (!selectedVariant) return;
     if ((selectedVariant.stock ?? 0) < 1 || selectedVariant.available === false) return;
+    if (!Number.isInteger(Number(product.id)) || Number(product.id) < 1) {
+      setFeedback('No se encontró el ID interno del producto.');
+      console.error('PRODUCT WITHOUT NUMERIC ID:', product);
+      return;
+    }
+
+    console.log('PRODUCT BEFORE CART:', product);
+    console.log('PRODUCT ID:', product.id, typeof product.id);
 
     addMerchItem({
-      productId: product.id ?? product.uuid,
+      slug,
+      productId: product.id,
       name: product.name,
+      imageUrl: product.image,
       variantId: selectedVariant.id,
       variantLabel: selectedVariant.label,
       unitPrice: visiblePrice,
@@ -134,6 +152,7 @@ function ProductDetail() {
   };
 
   const total = visiblePrice * quantity;
+  const price = calcularPrecioProductos(total, band?.precioEnvio ?? 0);
 
   return (
     <main className="bp-page product-page">
@@ -209,7 +228,12 @@ function ProductDetail() {
 
           <div className="product-price-wrap">
             <p className="bp-price product-price">Q{visiblePrice.toFixed(2)}</p>
-            <p className="product-total">Total: Q{total.toFixed(2)}</p>
+            <div className="product-price-breakdown">
+              <p><span>Q{price.subtotal.toFixed(2)}</span><span>Productos</span></p>
+              <p><span>Q{price.tarifaServicio.toFixed(2)}</span><span>Tarifa de servicio</span></p>
+              {price.costoEnvio > 0 ? <p><span>Q{price.costoEnvio.toFixed(2)}</span><span>Envío</span></p> : null}
+              <strong><span>Q{price.total.toFixed(2)}</span><span>Total</span></strong>
+            </div>
           </div>
 
           <div className="product-actions">

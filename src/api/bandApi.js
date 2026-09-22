@@ -47,3 +47,13 @@ export const updateBand = async (id, payload) => {
 export const getPublicBand = async (slug) => {
   return apiClient(`/api/Bandas/public/${slug}`);
 };
+
+export const mapBand = (data) => ({
+  uuid: data?.uuid,
+  nombre: data?.nombre,
+  slug: data?.slug,
+  descripcion: data?.descripcion,
+  imagenUrl: data?.imagenUrl,
+  genero: data?.genero,
+  precioEnvio: Number(data?.precioEnvio ?? 0),
+});

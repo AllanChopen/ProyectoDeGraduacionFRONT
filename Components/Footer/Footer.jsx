@@ -5,7 +5,7 @@ import { getPublicSocialLinks } from '../../src/api/redSocialApi';
 import { buildSocialLinksMap } from '../../src/utils/socialLinks';
 import './Footer.css';
 
-const RESERVED_ROOTS = new Set(['', 'login', 'dashboard', 'carrito', 'carrito-tickets']);
+const RESERVED_ROOTS = new Set(['', '404', 'login', 'dashboard', 'carrito', 'carrito-tickets', 'tienda']);
 
 function getBandSlug(pathname) {
   const [firstSegment] = pathname.split('/').filter(Boolean);
