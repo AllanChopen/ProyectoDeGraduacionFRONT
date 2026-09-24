@@ -1,3 +1,4 @@
+import '../../Components/BandExperience/BandExperience.css';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import NavBar from '../../Components/NavBar/NavBar';
@@ -76,19 +77,19 @@ function ProductDetail() {
       ];
 
   const defaultVariant = variants[0] ?? null;
-  const [selectedVariantId, setSelectedVariantId] = useState(defaultVariant?.id ?? '');
+  const [selectedVariantId, setSelectedVariantId] = useState(String(defaultVariant?.id ?? ''));
   const [quantity, setQuantity] = useState(1);
   const [feedback, setFeedback] = useState('');
 
   useEffect(() => {
-    setSelectedVariantId(defaultVariant?.id ?? '');
+    setSelectedVariantId(String(defaultVariant?.id ?? ''));
     setQuantity(1);
     setFeedback('');
   }, [defaultVariant?.id]);
 
   const selectedVariant = useMemo(() => {
     if (!product) return null;
-    return variants.find((variant) => variant.id === selectedVariantId) ?? variants[0];
+    return variants.find((variant) => String(variant.id) === String(selectedVariantId)) ?? variants[0];
   }, [product, selectedVariantId, variants]);
 
   const visibleStock = selectedVariant?.stock ?? product?.stock ?? 0;
@@ -96,7 +97,7 @@ function ProductDetail() {
 
   if (loading) {
     return (
-      <main className="bp-page product-page">
+      <main className="bp-page bp-experience product-page">
         <NavBar />
         <LoadingState label="Cargando producto..." />
         <Footer />
@@ -106,7 +107,7 @@ function ProductDetail() {
 
   if (!product || notFound) {
     return (
-      <main className="bp-page product-page">
+      <main className="bp-page bp-experience product-page">
         <NavBar />
         <section className="bp-section" aria-label="Producto no encontrado">
           <div className="bp-section-header">
@@ -155,11 +156,13 @@ function ProductDetail() {
   const price = calcularPrecioProductos(total, band?.precioEnvio ?? 0);
 
   return (
-    <main className="bp-page product-page">
+    <main className="bp-page bp-experience product-page">
       <NavBar />
 
       <section className="bp-section product-layout" aria-label={`Detalle de ${product.name}`}>
+        <nav className="experience-breadcrumb" aria-label="Ruta de navegación"><Link to={`/${slug}`}>La banda</Link><span aria-hidden="true">/</span><Link to={`/${slug}/store`}>Merch</Link><span aria-hidden="true">/</span><span>El producto</span></nav>
         <div className="product-media">
+          <div className="experience-photo-label"><span>MERCH / LA COLECCIÓN</span><span aria-hidden="true">↗</span></div>
           {product.image ? (
             <img src={product.image} alt={product.name} className="product-main-image" />
           ) : (
@@ -227,7 +230,6 @@ function ProductDetail() {
           </div>
 
           <div className="product-price-wrap">
-            <p className="bp-price product-price">Q{visiblePrice.toFixed(2)}</p>
             <div className="product-price-breakdown">
               <p><span>Q{price.subtotal.toFixed(2)}</span><span>Productos</span></p>
               <p><span>Q{price.tarifaServicio.toFixed(2)}</span><span>Tarifa de servicio</span></p>

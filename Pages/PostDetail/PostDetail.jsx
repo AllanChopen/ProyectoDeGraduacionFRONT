@@ -1,3 +1,4 @@
+import '../../Components/BandExperience/BandExperience.css';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import NavBar from '../../Components/NavBar/NavBar';
@@ -38,7 +39,7 @@ function PostDetail() {
 
   if (loading) {
     return (
-      <main className="bp-page post-detail-page">
+      <main className="bp-page bp-experience post-detail-page">
         <NavBar />
         <LoadingState label="Cargando noticia..." />
         <Footer />
@@ -48,7 +49,7 @@ function PostDetail() {
 
   if (error || !post) {
     return (
-      <main className="bp-page post-detail-page">
+      <main className="bp-page bp-experience post-detail-page">
         <NavBar />
         <section className="bp-section" aria-label="Noticia no encontrada">
           <div className="bp-section-header">
@@ -68,11 +69,12 @@ function PostDetail() {
   }
 
   return (
-    <main className="bp-page post-detail-page">
+    <main className="bp-page bp-experience post-detail-page">
       <NavBar />
 
-      <section className="bp-section post-article" style={{ paddingTop: '1rem' }} aria-label={`Noticia: ${post.title}`}>
-        <p className="post-kicker" style={{ textAlign: 'center' }}>Noticia</p>
+      <section className="bp-section post-article" aria-label={`Noticia: ${post.title}`}>
+        <nav className="experience-breadcrumb" aria-label="Ruta de navegación"><Link to={`/${slug}`}>La banda</Link><span aria-hidden="true">/</span><Link to={`/${slug}/blog`}>Backstage</Link></nav>
+        <header className="experience-article-header"><p className="experience-eyebrow">Journal / La historia</p><h1>{post.title}</h1><p className="post-date">{post.date}</p></header>
         
         <div className="post-cover-wrap">
           {post.image ? (
@@ -83,10 +85,6 @@ function PostDetail() {
         </div>
 
         <article className="post-content bp-contact-panel">
-          <strong style={{ fontSize: '1.5rem', display: 'block', marginBottom: '0.5rem' }}>
-            {post.title}
-          </strong>
-          <p className="post-date" style={{ marginBottom: '1rem' }}>{post.date}</p>
           {post.content?.map((paragraph, index) => (
             <p className="post-paragraph" key={index}>
               {paragraph}

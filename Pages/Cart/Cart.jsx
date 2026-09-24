@@ -1,3 +1,6 @@
+import PurchaseProgress from '../../Components/BandExperience/PurchaseProgress';
+import PageIntro from '../../Components/BandExperience/PageIntro';
+import '../../Components/BandExperience/BandExperience.css';
 import { Link, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import NavBar from '../../Components/NavBar/NavBar';
@@ -76,9 +79,14 @@ function Cart() {
       const checkoutId = response?.recurrente?.checkoutId;
       const checkoutUrl = response?.recurrente?.checkoutUrl;
       if (!checkoutId || !checkoutUrl) throw new Error('Respuesta de checkout inválida.');
-      const checkoutData = { checkoutId, slug };
-      localStorage.setItem('productCheckout', JSON.stringify(checkoutData));
-      console.log('PRODUCT CHECKOUT SAVED:', checkoutData);
+      localStorage.setItem(
+        'productCheckout',
+        JSON.stringify({ checkoutId, slug })
+      );
+      console.log(
+        'PRODUCT CHECKOUT SAVED:',
+        localStorage.getItem('productCheckout')
+      );
       window.location.href = checkoutUrl;
     } catch (error) {
       console.error('PRODUCT CHECKOUT ERROR:', error);
@@ -89,15 +97,12 @@ function Cart() {
   };
 
   return (
-    <main className="bp-page cart-page">
+    <main className="bp-page bp-experience cart-page">
       <NavBar />
 
       <section className="bp-section" aria-label="Carrito de merch">
-        <div className="bp-section-header">
-          <h1 className="bp-section-title">Carrito de compras</h1>
-          <div className="bp-divider" />
-          <p className="cart-subtitle">Aquí puedes ver y gestionar los productos de tu carrito de compras.</p>
-        </div>
+        <PageIntro eyebrow="Merch / Tu selección" title="CASI" accent="TUYO." description="Revisa tus productos y completa los datos para tu envío." backTo={slug ? `/${slug}/store` : '/'} backLabel="Seguir comprando" />
+        <PurchaseProgress />
 
         {isEmpty ? (
           <div className="bp-contact-panel cart-empty">
@@ -109,6 +114,7 @@ function Cart() {
         ) : (
           <div className="bp-container cart-layout">
             <div className="bp-contact-panel cart-items">
+              <h2 className="experience-panel-title">Tu selección <span>{merchTotalItems}</span></h2>
               {merchItems.map((item) => (
                 <article className="cart-item" key={`${item.productId}-${item.variantId}`}>
                   {item.imageUrl ? (
@@ -123,6 +129,7 @@ function Cart() {
                   <div className="cart-item-actions">
                     <input
                       type="number"
+                      aria-label={`Cantidad de ${item.name}`}
                       min="1"
                       value={item.quantity}
                       className="bp-field cart-qty"
@@ -145,6 +152,7 @@ function Cart() {
             </div>
 
             <aside className="bp-contact-panel cart-summary">
+              <span className="experience-eyebrow">Tu compra, en detalle</span>
               <h2 className="bp-about-title">Resumen</h2>
               <p className="bp-meta">Items: {merchTotalItems}</p>
               <div className="cart-price-breakdown">
@@ -154,6 +162,7 @@ function Cart() {
                 <strong><span>Q{price.total.toFixed(2)}</span><span>Total</span></strong>
               </div>
               <div className="cart-checkout-fields">
+                <h3>¿A dónde lo enviamos?</h3>
                 {[
                   ['nombre', 'Nombre', 'text'],
                   ['email', 'Email', 'email'],

@@ -1,92 +1,32 @@
-import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './Posts.css';
 
 function Posts({ posts, slug }) {
-  const containerRef = useRef(null);
-  const [canPrev, setCanPrev] = useState(false);
-  const [canNext, setCanNext] = useState(false);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const updateButtons = () => {
-      setCanPrev(container.scrollLeft > 0);
-      setCanNext(container.scrollLeft + container.clientWidth < container.scrollWidth - 1);
-    };
-
-    updateButtons();
-    container.addEventListener('scroll', updateButtons);
-    window.addEventListener('resize', updateButtons);
-
-    return () => {
-      container.removeEventListener('scroll', updateButtons);
-      window.removeEventListener('resize', updateButtons);
-    };
-  }, [posts]);
-
-  const scrollByCard = (direction) => {
-    const container = containerRef.current;
-    if (!container) return;
-    const card = container.querySelector('.bp-post-card');
-    const amount = card ? card.offsetWidth + 16 : Math.round(container.clientWidth * 0.8);
-    container.scrollBy({ left: direction * amount, behavior: 'smooth' });
-  };
-
   return (
-    <section id="posts" className="bp-section" aria-label="Latest posts">
+    <section id="posts" className="bp-section bp-journal" aria-label="Noticias de la banda">
       <div className="bp-section-header">
-        <h2 className="bp-section-title">Blog</h2>
-        <div className="bp-divider" />
+        <span className="bp-home-eyebrow">04 / Desde dentro</span>
+        <h2 className="bp-section-title">EL BACKSTAGE.</h2>
+        <p className="bp-section-intro">Historias, novedades y todo lo que viene.</p>
       </div>
-
-      <div className="bp-container bp-carousel-wrap">
-        <button
-          className="bp-nav-arrow bp-prev"
-          type="button"
-          aria-label="Anterior posts"
-          onClick={() => scrollByCard(-1)}
-          disabled={!canPrev}
-        >
-          {'<'}
-        </button>
-        <button
-          className="bp-nav-arrow bp-next"
-          type="button"
-          aria-label="Siguiente posts"
-          onClick={() => scrollByCard(1)}
-          disabled={!canNext}
-        >
-          {'>'}
-        </button>
-
-        <div className="bp-carousel" ref={containerRef}>
-          {posts.map((post) => (
-            <article className="bp-post-card" key={post.id}>
-              {post.image ? (
-                <img src={post.image} alt={post.title} className="bp-post-image" />
-              ) : (
-                <div className="bp-post-image bp-image-placeholder" aria-hidden="true" />
-              )}
-              <div className="bp-card-content">
-                <strong>{post.title}</strong>
-                <p className="bp-meta">{post.excerpt}</p>
-                <p className="bp-meta">{post.date}</p>
-                <Link to={`/${slug}/blog/${post.id}`} className="bp-btn bp-btn-small bp-card-cta">
-                  Ver
-                </Link>
-              </div>
-            </article>
-          ))}
-        </div>
+      <div className="bp-journal-grid">
+        {posts.map((post, index) => (
+          <Link to={`/${slug}/blog/${post.id}`} className={`bp-journal-card ${index === 0 ? 'bp-journal-featured' : ''}`} key={post.id}>
+            <div className="bp-journal-media">
+              {post.image ? <img src={post.image} alt={post.title} loading="lazy" /> : <div className="bp-journal-placeholder" aria-hidden="true">BACK<br />STAGE.</div>}
+              <span className="bp-journal-arrow" aria-hidden="true">↗</span>
+            </div>
+            <div className="bp-journal-copy">
+              <span className="bp-home-eyebrow">{post.date || 'Noticias'}</span>
+              <h3>{post.title}</h3>
+              <p>{post.excerpt}</p>
+              <span className="bp-journal-read">Leer historia <span aria-hidden="true">↗</span></span>
+            </div>
+          </Link>
+        ))}
+        {posts.length === 0 ? <p className="bp-home-empty">Muy pronto, más historias de la banda.</p> : null}
       </div>
-
-      <div className="bp-more-wrap">
-        <Link to={`/${slug}/blog`} className="bp-btn">
-          Mostrar mas
-        </Link>
-      </div>
+      <div className="bp-more-wrap"><Link to={`/${slug}/blog`} className="bp-btn">Todas las noticias <span aria-hidden="true">↗</span></Link></div>
     </section>
   );
 }

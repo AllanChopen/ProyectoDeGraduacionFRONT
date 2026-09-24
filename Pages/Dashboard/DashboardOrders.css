@@ -1,0 +1,82 @@
+.orders-shipping-panel {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.orders-list {
+  margin-top: 0.8rem;
+}
+
+.order-card {
+  grid-template-columns: 1fr;
+  color: inherit;
+  text-decoration: none;
+  max-height: none;
+}
+
+.order-card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.order-status {
+  display: inline-flex;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.order-status.is-new {
+  color: #fff2c2;
+  background: rgba(242, 177, 52, 0.2);
+  border: 1px solid rgba(242, 177, 52, 0.4);
+}
+
+.order-status.is-sent {
+  color: #c8f7d5;
+  background: rgba(61, 181, 93, 0.18);
+  border: 1px solid rgba(61, 181, 93, 0.38);
+}
+
+.order-detail-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  align-items: start;
+  text-align: left;
+}
+
+.order-detail-card {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.order-detail-card .bp-btn {
+  justify-self: start;
+  margin-top: 0.4rem;
+}
+
+.order-detail-status,
+.order-detail-products {
+  grid-column: 1 / -1;
+}
+
+.order-detail-products {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.order-product-card {
+  max-height: none;
+}
+
+@media (max-width: 760px) {
+  .order-detail-layout {
+    grid-template-columns: 1fr;
+  }
+}

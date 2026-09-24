@@ -1,94 +1,33 @@
-import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './Shows.css';
 
 function Shows({ shows, slug }) {
-  const containerRef = useRef(null);
-  const [canPrev, setCanPrev] = useState(false);
-  const [canNext, setCanNext] = useState(false);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const updateButtons = () => {
-      setCanPrev(container.scrollLeft > 0);
-      setCanNext(container.scrollLeft + container.clientWidth < container.scrollWidth - 1);
-    };
-
-    updateButtons();
-    container.addEventListener('scroll', updateButtons);
-    window.addEventListener('resize', updateButtons);
-
-    return () => {
-      container.removeEventListener('scroll', updateButtons);
-      window.removeEventListener('resize', updateButtons);
-    };
-  }, [shows]);
-
-  const scrollByCard = (direction) => {
-    const container = containerRef.current;
-    if (!container) return;
-    const card = container.querySelector('.bp-show-card');
-    const amount = card ? card.offsetWidth + 16 : Math.round(container.clientWidth * 0.8);
-    container.scrollBy({ left: direction * amount, behavior: 'smooth' });
-  };
-
   return (
-    <section id="shows" className="bp-section bp-shows" aria-label="Upcoming shows">
+    <section id="shows" className="bp-section bp-shows" aria-label="Shows">
       <div className="bp-section-header">
-        <h2 className="bp-section-title">Shows</h2>
-        <div className="bp-divider" />
+        <span className="bp-home-eyebrow">03 / Frente al escenario</span>
+        <h2 className="bp-section-title">NOS VEMOS<br /><em>EN VIVO.</em></h2>
+        <p className="bp-section-intro">Elige tu fecha. Encuentra tu lugar. Vive el sonido.</p>
       </div>
-
-      <div className="bp-container bp-carousel-wrap">
-        <button
-          className="bp-nav-arrow bp-prev"
-          type="button"
-          aria-label="Anterior shows"
-          onClick={() => scrollByCard(-1)}
-          disabled={!canPrev}
-        >
-          {'<'}
-        </button>
-        <button
-          className="bp-nav-arrow bp-next"
-          type="button"
-          aria-label="Siguiente shows"
-          onClick={() => scrollByCard(1)}
-          disabled={!canNext}
-        >
-          {'>'}
-        </button>
-
-        <div className="bp-carousel" ref={containerRef}>
-          {shows.map((show) => (
-            <article className="bp-show-card" key={show.id}>
-              {show.poster ? (
-                <img src={show.poster} alt={show.title} className="bp-show-image" />
-              ) : (
-                <div className="bp-show-image bp-image-placeholder" aria-hidden="true" />
-              )}
-              <div className="bp-card-content">
-                <strong>{show.title}</strong>
-                <p className="bp-meta">{show.venue}</p>
-                <p className="bp-meta">{show.location}</p>
-                <p className="bp-meta">{show.date}</p>
-                <p className="bp-meta">{show.status}</p>
-                <Link to={`/${slug}/shows/${show.id}`} className="bp-btn bp-btn-small bp-card-cta">
-                  Ver
-                </Link>
-              </div>
-            </article>
-          ))}
-        </div>
+      <div className="bp-live-list">
+        {shows.map((show, index) => (
+          <article className="bp-live-row" key={show.id}>
+            <span className="bp-live-index" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+            {show.poster ? <img src={show.poster} alt={show.title} loading="lazy" /> : <div className="bp-live-placeholder" aria-hidden="true">↗</div>}
+            <div className="bp-live-info">
+              <p className="bp-live-date">{show.date}</p>
+              <h3>{show.title}</h3>
+              <p className="bp-meta">{[show.venue, show.location].filter(Boolean).join(' · ')}</p>
+            </div>
+            <div className="bp-live-action">
+              {show.status ? <span className="bp-live-status">{show.status}</span> : null}
+              <Link to={`/${slug}/shows/${show.id}`} className="bp-btn bp-btn-small">Ver show <span aria-hidden="true">↗</span></Link>
+            </div>
+          </article>
+        ))}
+        {shows.length === 0 ? <p className="bp-home-empty">Las próximas fechas aparecerán aquí. Mantente cerca.</p> : null}
       </div>
-
-      <div className="bp-more-wrap">
-        <Link to={`/${slug}/shows`} className="bp-btn">
-          Mostrar mas shows
-        </Link>
-      </div>
+      <div className="bp-more-wrap"><Link to={`/${slug}/shows`} className="bp-btn">Todos los shows <span aria-hidden="true">↗</span></Link></div>
     </section>
   );
 }

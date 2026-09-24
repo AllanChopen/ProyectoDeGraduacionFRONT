@@ -1,3 +1,6 @@
+import PurchaseProgress from '../../Components/BandExperience/PurchaseProgress';
+import PageIntro from '../../Components/BandExperience/PageIntro';
+import '../../Components/BandExperience/BandExperience.css';
 import { Link } from 'react-router-dom';
 import NavBar from '../../Components/NavBar/NavBar';
 import Footer from '../../Components/Footer/Footer';
@@ -24,17 +27,12 @@ function TicketCart() {
   const ticketGrandTotal = ticketPrices.reduce((sum, item) => sum + item.price.total, 0);
 
   return (
-    <main className="bp-page ticket-cart-page">
+    <main className="bp-page bp-experience ticket-cart-page">
       <NavBar />
 
       <section className="bp-section" aria-label="Carrito de tickets">
-        <div className="bp-section-header">
-          <h1 className="bp-section-title">Carrito Tickets</h1>
-          <div className="bp-divider" />
-          <p className="ticket-cart-subtitle">
-            Este carrito es exclusivo para boletos de shows y no se mezcla con merch.
-          </p>
-        </div>
+        <PageIntro eyebrow="Live / Tu selección" title="TU PRÓXIMO" accent="ENCUENTRO." description="Revisa los shows y las entradas que agregaste a tu carrito." />
+        <PurchaseProgress />
 
         {isEmpty ? (
           <div className="bp-contact-panel ticket-cart-empty">
@@ -46,6 +44,7 @@ function TicketCart() {
         ) : (
           <div className="bp-container ticket-cart-layout">
             <div className="bp-contact-panel ticket-cart-items">
+              <h2 className="experience-panel-title">Tus entradas <span>{ticketTotalItems}</span></h2>
               {ticketPrices.map((item) => (
                 <article className="ticket-cart-item" key={item.eventoId ?? item.showId}>
                   {item.poster ? (
@@ -66,6 +65,7 @@ function TicketCart() {
                   <div className="ticket-cart-item-actions">
                     <input
                       type="number"
+                      aria-label={`Cantidad de entradas para ${item.name}`}
                       min="1"
                       value={item.quantity}
                       className="bp-field ticket-cart-qty"

@@ -1,3 +1,5 @@
+import PageIntro from '../../Components/BandExperience/PageIntro';
+import '../../Components/BandExperience/BandExperience.css';
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import NavBar from '../../Components/NavBar/NavBar';
@@ -34,7 +36,7 @@ function Tickets() {
 
 	if (loading) {
 		return (
-			<main className="bp-page tickets-page">
+			<main className="bp-page bp-experience tickets-page">
 				<NavBar />
 				<LoadingState label="Cargando shows..." />
 				<Footer />
@@ -43,22 +45,12 @@ function Tickets() {
 	}
 
 	return (
-		<main className="bp-page tickets-page">
+		<main className="bp-page bp-experience tickets-page">
 			<NavBar />
 
 			<section className="bp-section tickets-hero" aria-label="Encabezado shows">
-				<div className="bp-section-header">
-					<h1 className="bp-section-title">Todos los Shows</h1>
-					<div className="bp-divider" />
-					<p className="tickets-subtitle">
-						Fechas confirmadas, nuevas ciudades y actualizaciones de boletos.
-					</p>
-				</div>
-				<div className="bp-more-wrap">
-				<Link to={`/${slug}`} className="bp-btn bp-btn-ghost">
-					Volver al sitio
-				</Link>
-			</div>
+				<PageIntro eyebrow="Live / La cartelera" title="NOS VEMOS" accent="EN VIVO." description="Fechas, ciudades y un lugar frente al escenario. Encuentra tu próximo show." backTo={`/${slug}`} />
+				<div className="experience-catalog-bar"><span>{shows.length} shows</span><span>Sube el volumen ↗</span></div>
 		</section>
 
 		<section className="bp-section" aria-label="Listado completo de shows">
@@ -78,7 +70,7 @@ function Tickets() {
 								<p className="bp-meta">{show.date}</p>
 								<p className="bp-meta">{show.status}</p>
 								<Link to={`/${slug}/shows/${show.id}`} className="bp-btn bp-btn-small bp-card-cta">
-									Ver
+									Ver show ↗
 								</Link>
 							</div>
 						</article>

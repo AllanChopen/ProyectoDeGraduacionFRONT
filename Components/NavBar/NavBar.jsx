@@ -201,11 +201,13 @@ function NavBar() {
               Contacto
             </a>
           </li>
-          <li>
-            <Link to={dashboardPath} onClick={closeMenu}>
-              Dashboard
-            </Link>
-          </li>
+          {isAuthenticated ? (
+            <li>
+              <Link to={dashboardPath} onClick={closeMenu}>
+                Dashboard
+              </Link>
+            </li>
+          ) : null}
           <li>
             {isAuthenticated ? (
               <button type="button" className="nav-logout" onClick={handleLogout}>
@@ -213,7 +215,7 @@ function NavBar() {
               </button>
             ) : (
               <Link to="/login" onClick={closeMenu}>
-                Login
+                Iniciar sesion
               </Link>
             )}
           </li>

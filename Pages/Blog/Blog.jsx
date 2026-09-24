@@ -1,3 +1,5 @@
+import PageIntro from '../../Components/BandExperience/PageIntro';
+import '../../Components/BandExperience/BandExperience.css';
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import NavBar from '../../Components/NavBar/NavBar';
@@ -34,7 +36,7 @@ function Blog() {
 
   if (loading) {
     return (
-      <main className="bp-page blog-page">
+      <main className="bp-page bp-experience blog-page">
         <NavBar />
         <LoadingState label="Cargando blog..." />
         <Footer />
@@ -43,22 +45,12 @@ function Blog() {
   }
 
   return (
-    <main className="bp-page blog-page">
+    <main className="bp-page bp-experience blog-page">
       <NavBar />
 
       <section className="bp-section blog-hero" aria-label="Encabezado blog">
-        <div className="bp-section-header">
-          <h1 className="bp-section-title">Blog Completo</h1>
-          <div className="bp-divider" />
-          <p className="blog-subtitle">
-            Noticias, backstage y novedades de Lost In The Ocean en un solo feed.
-          </p>
-        </div>
-        <div className="bp-more-wrap">
-          <Link to={`/${slug}`} className="bp-btn bp-btn-ghost">
-            Volver al sitio
-          </Link>
-        </div>
+        <PageIntro eyebrow="Journal / Desde dentro" title="EL" accent="BACKSTAGE." description="Las historias detrás de la música. Noticias, lanzamientos y lo que viene." backTo={`/${slug}`} />
+        <div className="experience-catalog-bar"><span>{posts.length} historias</span><span>Detrás del sonido ↗</span></div>
       </section>
 
       <section className="bp-section" aria-label="Listado completo de publicaciones">
@@ -76,7 +68,7 @@ function Blog() {
                 <p className="bp-meta">{post.excerpt}</p>
                 <p className="bp-meta">{post.date}</p>
                 <Link to={`/${slug}/blog/${post.id}`} className="bp-btn bp-btn-small bp-card-cta">
-                  Ver
+                  Leer historia ↗
                 </Link>
               </div>
             </article>

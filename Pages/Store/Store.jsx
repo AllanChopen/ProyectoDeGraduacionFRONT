@@ -1,3 +1,5 @@
+import PageIntro from '../../Components/BandExperience/PageIntro';
+import '../../Components/BandExperience/BandExperience.css';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import NavBar from '../../Components/NavBar/NavBar';
@@ -35,7 +37,7 @@ function Store() {
 
 	if (loading) {
 		return (
-			<main className="bp-page store-page">
+			<main className="bp-page bp-experience store-page">
 				<NavBar />
 				<LoadingState label="Cargando tienda..." />
 				<Footer />
@@ -44,20 +46,12 @@ function Store() {
 	}
 
 	return (
-		<main className="bp-page store-page">
+		<main className="bp-page bp-experience store-page">
 			<NavBar />
 
 			<section className="bp-section store-hero" aria-label="Encabezado tienda">
-				<div className="bp-section-header">
-					<h1 className="bp-section-title">Tienda Completa</h1>
-					<div className="bp-divider" />
-					<p className="store-subtitle">Todo el merch oficial de Lost In The Ocean en un solo lugar.</p>
-				</div>
-				<div className="bp-more-wrap">
-					<Link to={`/${slug}`} className="bp-btn bp-btn-ghost">
-						Volver al sitio
-					</Link>
-				</div>
+				<PageIntro eyebrow="Merch / La colección" title="FUERA DEL" accent="ESCENARIO." description="El sonido también se lleva contigo. Descubre la colección de la banda." backTo={`/${slug}`} />
+				<div className="experience-catalog-bar"><span>{products.length} productos</span><Link to={`/${slug}/carrito`}>Ver carrito ↗</Link></div>
 			</section>
 
 			<section className="bp-section" aria-label="Listado completo de productos">
@@ -75,7 +69,7 @@ function Store() {
 								<p className="bp-price">Q{product.price.toFixed(2)}</p>
 								{product.id || product.uuid ? (
 									<Link to={`/${slug}/store/product/${product.id ?? product.uuid}`} className="bp-btn bp-btn-small">
-										Ver
+										Ver producto ↗
 									</Link>
 								) : (
 									<button type="button" className="bp-btn bp-btn-small" disabled>
@@ -86,6 +80,7 @@ function Store() {
 						</article>
 					))}
 				</div>
+				{products.length === 0 ? <p className="experience-empty">El próximo merch de la banda aparecerá aquí.</p> : null}
 			</section>
 
 			<Footer />

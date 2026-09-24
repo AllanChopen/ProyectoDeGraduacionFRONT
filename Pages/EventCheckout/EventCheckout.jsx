@@ -1,3 +1,6 @@
+import PurchaseProgress from '../../Components/BandExperience/PurchaseProgress';
+import PageIntro from '../../Components/BandExperience/PageIntro';
+import '../../Components/BandExperience/BandExperience.css';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import NavBar from '../../Components/NavBar/NavBar';
@@ -83,16 +86,17 @@ function EventCheckout() {
     }
   };
 
-  if (loading) return <main className="bp-page"><NavBar /><LoadingState label="Cargando checkout..." /><Footer /></main>;
-  if (!show) return <main className="bp-page"><NavBar /><section className="bp-section"><p>{error}</p></section><Footer /></main>;
+  if (loading) return <main className="bp-page bp-experience"><NavBar /><LoadingState label="Cargando checkout..." /><Footer /></main>;
+  if (!show) return <main className="bp-page bp-experience"><NavBar /><section className="bp-section"><p>{error}</p></section><Footer /></main>;
 
   return (
-    <main className="bp-page event-checkout-page">
+    <main className="bp-page bp-experience event-checkout-page">
       <NavBar />
+      <section className="bp-section experience-checkout-intro"><PageIntro eyebrow="Live / Tu compra" title="UN PASO DEL" accent="ESCENARIO." description="Revisa tus entradas y completa tus datos para continuar al pago." backTo={`/${slug}/shows/${showId}`} backLabel="Volver al show" /><PurchaseProgress /></section>
       <section className="bp-section event-checkout-layout" aria-label="Checkout de tickets">
         <div className="event-checkout-event bp-contact-panel">
           {show.poster ? <img src={show.poster} alt={show.title} className="event-checkout-image" /> : null}
-          <h1 className="bp-section-title show-title">Comprar tickets</h1>
+          <span className="experience-eyebrow">Tu show / Tus entradas</span>
           <h2>{show.title}</h2>
           <p className="bp-meta">{show.date} · {show.venue}</p>
           <div className="show-price-breakdown checkout-breakdown">
@@ -104,6 +108,7 @@ function EventCheckout() {
         </div>
         <form className="bp-contact-panel event-checkout-form" onSubmit={handleSubmit}>
           <h2 className="bp-about-title">Datos del comprador</h2>
+          <p className="experience-form-note">Un último paso antes de subir el volumen.</p>
           {['nombre', 'email', 'telefono'].map((field) => (
             <label className="checkout-field" key={field}>
               {field === 'nombre' ? 'Nombre' : field === 'email' ? 'Email' : 'Teléfono'}

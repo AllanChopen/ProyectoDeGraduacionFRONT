@@ -1,3 +1,4 @@
+import '../../Components/BandExperience/BandExperience.css';
 import { useMemo, useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import NavBar from '../../Components/NavBar/NavBar';
@@ -57,7 +58,7 @@ function ShowDetail() {
 
   if (loading) {
     return (
-      <main className="bp-page show-detail-page">
+      <main className="bp-page bp-experience show-detail-page">
         <NavBar />
         <LoadingState label="Cargando show..." />
         <Footer />
@@ -67,7 +68,7 @@ function ShowDetail() {
 
   if (error || !show) {
     return (
-      <main className="bp-page show-detail-page">
+      <main className="bp-page bp-experience show-detail-page">
         <NavBar />
         <section className="bp-section" aria-label="Show no encontrado">
           <div className="bp-section-header">
@@ -96,11 +97,13 @@ function ShowDetail() {
   const precio = selectedTicket ? calcularPrecioEvento(selectedTicket.price, quantity) : null;
 
   return (
-    <main className="bp-page show-detail-page">
+    <main className="bp-page bp-experience show-detail-page">
       <NavBar />
 
       <section className="bp-section show-layout" aria-label={`Compra de tickets para ${show.title}`}>
+        <nav className="experience-breadcrumb" aria-label="Ruta de navegación"><Link to={`/${slug}`}>La banda</Link><span aria-hidden="true">/</span><Link to={`/${slug}/shows`}>Shows</Link><span aria-hidden="true">/</span><span>El evento</span></nav>
         <div className="show-media">
+          <div className="experience-photo-label"><span>LIVE / FRENTE AL ESCENARIO</span><span aria-hidden="true">✳</span></div>
           {show.poster ? (
             <img src={show.poster} alt={show.title} className="show-main-image" />
           ) : (
@@ -111,7 +114,6 @@ function ShowDetail() {
         <article className="show-info bp-contact-panel">
           <p className="show-type">Tickets</p>
           <h1 className="bp-section-title show-title">{show.title}</h1>
-          <p className="show-description">{show.description}</p>
 
           <div className="show-top-actions">
             <Link to={`/${slug}/shows`} className="bp-btn bp-btn-small bp-btn-ghost">
@@ -202,6 +204,7 @@ function ShowDetail() {
           </div>
 
         </article>
+        {show.description ? <section className="experience-show-story" aria-label="Acerca del show"><span className="experience-eyebrow">Detrás de esta fecha</span><h2>El encuentro.</h2><p className="show-description">{show.description}</p></section> : null}
       </section>
 
       <Footer />

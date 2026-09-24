@@ -1,3 +1,5 @@
+import PurchaseProgress from '../../Components/BandExperience/PurchaseProgress';
+import '../../Components/BandExperience/BandExperience.css';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
@@ -58,12 +60,12 @@ function EventCheckoutSuccess() {
   }, []);
 
   if (loading) {
-    return <main className="bp-page"><NavBar /><LoadingState label="Confirmando tu pago..." /><Footer /></main>;
+    return <main className="bp-page bp-experience"><NavBar /><LoadingState label="Confirmando tu pago..." /><Footer /></main>;
   }
 
   if (error || !compra) {
     return (
-      <main className="bp-page">
+      <main className="bp-page bp-experience">
         <NavBar />
         <section className="bp-section checkout-success-error">
           <h1>No pudimos cargar tu compra</h1>
@@ -76,13 +78,16 @@ function EventCheckoutSuccess() {
   }
 
   return (
-    <main className="bp-page event-success-page">
+    <main className="bp-page bp-experience event-success-page">
       <NavBar />
       <section className="bp-section">
-        <div className="event-success-header">
-          <h1>¡Pago confirmado!</h1>
-          <p>Tu compra fue procesada correctamente.</p>
+        <div className="event-success-header experience-success-header">
+          <span className="experience-success-mark" aria-hidden="true">✓</span>
+          <span className="experience-eyebrow">Live / Pago confirmado</span>
+          <h1>NOS VEMOS <em>AHÍ.</em></h1>
+          <p>Tu compra fue procesada correctamente. Tus entradas están aquí.</p>
         </div>
+        <PurchaseProgress confirmed />
 
         <div className="bp-contact-panel event-success-summary">
           <h2>{compra.evento?.nombre}</h2>
@@ -103,6 +108,8 @@ function EventCheckoutSuccess() {
 
         <section className="event-success-tickets">
           <h2>Tus entradas</h2>
+          <p className="experience-form-note">Presenta el código QR de cada entrada al ingresar al show.</p>
+          <div className="experience-ticket-grid">
           {compra.tickets?.map((ticket, index) => {
             const ticketUrl = `${window.location.origin}/ticket/${ticket.codigoQr}`;
             return (
@@ -117,6 +124,7 @@ function EventCheckoutSuccess() {
               </article>
             );
           })}
+          </div>
         </section>
 
         <Link className="bp-btn" to={`/${slug}`}>Volver a {slug}</Link>

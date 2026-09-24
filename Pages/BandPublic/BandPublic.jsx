@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import './BandPublic.css';
 import LoadingState from '../../Components/LoadingState/LoadingState';
@@ -15,6 +15,7 @@ import { getPublicBand, mapBand } from '../../src/api/bandApi';
 import { getPublicEvents, mapEventoToCard, sortEventosForDisplay } from '../../src/api/eventosApi';
 import { getPublicPosts, mapPublicacionToCard } from '../../src/api/publicacionesApi';
 import { getPublicProducts, mapProductoToCard } from '../../src/api/productosApi';
+import './BandPresentation.css';
 
 function BandPublic() {
   const { slug } = useParams();
@@ -24,6 +25,37 @@ function BandPublic() {
   const [shows, setShows] = useState([]);
   const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const pageRef = useRef(null);
+
+  useEffect(() => {
+    if (isLoading || !pageRef.current || !('IntersectionObserver' in window)) return;
+    const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const animations = new Set();
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(({ target, isIntersecting }) => {
+        if (!isIntersecting) return;
+        observer.unobserve(target);
+        if (preference.matches || !target.animate) return;
+        const animation = target.animate(
+          [{ opacity: 0.35, transform: 'translateY(22px)' }, { opacity: 1, transform: 'translateY(0)' }],
+          { duration: 650, easing: 'cubic-bezier(.2,.7,.2,1)' }
+        );
+        animations.add(animation);
+        animation.onfinish = () => animations.delete(animation);
+      });
+    }, { threshold: 0.08 });
+    pageRef.current.querySelectorAll('.bp-section-header, .bp-carousel-wrap, .bp-about-inner, .bp-contact-grid, .bp-live-row, .bp-journal-card')
+      .forEach((element) => observer.observe(element));
+    const stopMotion = () => {
+      if (preference.matches) animations.forEach((animation) => animation.cancel());
+    };
+    preference.addEventListener('change', stopMotion);
+    return () => {
+      observer.disconnect();
+      animations.forEach((animation) => animation.cancel());
+      preference.removeEventListener('change', stopMotion);
+    };
+  }, [isLoading, slug]);
 
   useEffect(() => {
     let isMounted = true;
@@ -95,9 +127,12 @@ function BandPublic() {
   }
 
   return (
-    <main className="bp-page">
+    <main className="bp-page bp-band-home" ref={pageRef}>
       <NavBar />
-      <Hero title={band?.nombre} subtitle={band?.descripcion} image={band?.imagenUrl || heroImage} />
+      <Hero title={band?.nombre} subtitle={band?.descripcion} image={band?.imagenUrl || heroImage} genre={band?.genero} />
+      <div className="bp-band-strip" aria-hidden="true">
+        <span>{band?.nombre}</span><span>✳</span><span>SUBE EL VOLUMEN</span><span>✳</span><span>{band?.genero || 'LIVE MUSIC'}</span>
+      </div>
       <About
         paragraphs={band?.biografia ? band.biografia.split(/\r?\n\r?\n/) : []}
         image={band?.biografiaImagenUrl}

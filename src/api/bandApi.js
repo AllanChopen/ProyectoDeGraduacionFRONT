@@ -44,6 +44,13 @@ export const updateBand = async (id, payload) => {
   });
 };
 
+export const updateMyBandShippingPrice = async (precioEnvio) => {
+  return apiClient('/api/Bandas/mi-banda/precio-envio', {
+    method: 'PUT',
+    body: JSON.stringify({ precioEnvio: Number(precioEnvio) }),
+  });
+};
+
 export const getPublicBand = async (slug) => {
   return apiClient(`/api/Bandas/public/${slug}`);
 };
@@ -53,7 +60,9 @@ export const mapBand = (data) => ({
   nombre: data?.nombre,
   slug: data?.slug,
   descripcion: data?.descripcion,
+  biografia: data?.biografia,
   imagenUrl: data?.imagenUrl,
+  biografiaImagenUrl: data?.biografiaImagenUrl,
   genero: data?.genero,
   precioEnvio: Number(data?.precioEnvio ?? 0),
 });

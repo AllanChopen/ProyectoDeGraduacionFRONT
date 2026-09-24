@@ -8,6 +8,8 @@ import DashboardMessageDetail from '../Pages/Dashboard/DashboardMessageDetail';
 import DashboardMessages from '../Pages/Dashboard/DashboardMessages';
 import DashboardProducts from '../Pages/Dashboard/DashboardProducts';
 import DashboardShows from '../Pages/Dashboard/DashboardShows';
+import DashboardOrders from '../Pages/Dashboard/DashboardOrders';
+import DashboardOrderDetail from '../Pages/Dashboard/DashboardOrderDetail';
 import Login from '../Pages/Login/Login';
 import { Route, Routes } from 'react-router-dom';
 import PostDetail from '../Pages/PostDetail/PostDetail';
@@ -52,6 +54,8 @@ function App() {
     <Route path="/:slug/dashboard/mensajes/:messageId" element={<ProtectedRoute><DashboardMessageDetail /></ProtectedRoute>} />
     <Route path="/:slug/dashboard/productos" element={<ProtectedRoute><DashboardProducts /></ProtectedRoute>} />
     <Route path="/:slug/dashboard/shows" element={<ProtectedRoute><DashboardShows /></ProtectedRoute>} />
+    <Route path="/:slug/dashboard/ordenes" element={<ProtectedRoute><DashboardOrders /></ProtectedRoute>} />
+    <Route path="/:slug/dashboard/ordenes/:orderId" element={<ProtectedRoute><DashboardOrderDetail /></ProtectedRoute>} />
     <Route path="/:slug/dashboard/blog" element={<ProtectedRoute><DashboardBlog /></ProtectedRoute>} />
 
     <Route path="*" element={<NotFound />} />

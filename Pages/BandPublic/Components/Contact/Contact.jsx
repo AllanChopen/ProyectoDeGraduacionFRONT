@@ -70,10 +70,10 @@ function Contact({ slug }) {
   };
 
   return (
-    <section id="contact" className="bp-section" aria-label="Contact Lost In The Ocean">
+    <section id="contact" className="bp-section" aria-label="Contacto con la banda">
       <div className="bp-section-header">
-        <h2 className="bp-section-title">Contacto</h2>
-        <div className="bp-divider" />
+        <span className="bp-home-eyebrow">05 / Sigamos en contacto</span>
+        <h2 className="bp-section-title">HAGAMOS<br /><em>RUIDO.</em></h2>
       </div>
 
       <div className="bp-container bp-contact-grid">
