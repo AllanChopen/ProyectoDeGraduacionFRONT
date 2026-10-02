@@ -18,9 +18,10 @@ function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
   const [managedSlug, setManagedSlug] = useState('');
   const [brandName, setBrandName] = useState('');
+  const [brandLogo, setBrandLogo] = useState('');
   const [socialLinks, setSocialLinks] = useState(() => buildSocialLinksMap());
   const { merchTotalItems } = useCart();
-  const { bandaId, isAuthenticated, logout } = useAuth();
+  const { bandaId, activeSlug, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -32,11 +33,7 @@ function NavBar() {
     : managedSlug
       ? `/${managedSlug}`
       : '/';
-  const dashboardPath = bandSlug
-    ? `/${bandSlug}/dashboard`
-    : managedSlug
-      ? `/${managedSlug}/dashboard`
-      : '/login';
+  const dashboardPath = activeSlug ? `/${activeSlug}/dashboard` : '/login';
 
   useEffect(() => {
     setIsOpen(false);
@@ -79,6 +76,7 @@ function NavBar() {
       if (!bandSlug) {
         if (isMounted) {
           setBrandName('');
+          setBrandLogo('');
         }
         return;
       }
@@ -87,10 +85,12 @@ function NavBar() {
         const band = await getPublicBand(bandSlug);
         if (isMounted) {
           setBrandName(band?.nombre || '');
+          setBrandLogo(band?.logoUrl || '');
         }
       } catch {
         if (isMounted) {
           setBrandName('');
+          setBrandLogo('');
         }
       }
     };
@@ -145,7 +145,7 @@ function NavBar() {
     <header className="site-header">
       <Link to={homePath} className="logo" onClick={closeMenu}>
         <span className="logo-mark" aria-hidden="true">
-          <img src="/icons/cart.svg" alt="Brand icon" />
+          <img src={brandLogo || '/icons/cart.svg'} alt="" className={brandLogo ? 'band-logo-image' : ''} />
         </span>
         {brandName ? <span className="logo-text">{brandName}</span> : null}
       </Link>
@@ -258,6 +258,11 @@ function NavBar() {
               <img src="/icons/tiktok.svg" alt="TikTok" />
             </a>
           ) : null}
+          {['youtube', 'spotify', 'otro'].map((type) => socialLinks[type].href ? (
+            <a key={type} href={socialLinks[type].href} target="_blank" rel="noreferrer" className="ico" aria-label={socialLinks[type].label || (type === 'youtube' ? 'YouTube' : type === 'spotify' ? 'Spotify' : 'Otro enlace')} title={socialLinks[type].label || type}>
+              <img src={`/icons/${type === 'otro' ? 'link' : type}.svg`} alt="" />
+            </a>
+          ) : null)}
           {socialLinks.email.href ? (
             <a href={socialLinks.email.href} aria-label="Email" className="ico" title="Email">
               <img src="/icons/mail.svg" alt="Email" />

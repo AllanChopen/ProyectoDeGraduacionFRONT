@@ -15,6 +15,9 @@ const DEFAULT_SOCIAL_LINKS = {
     href: '',
     label: '',
   },
+  youtube: { href: '', label: '' },
+  spotify: { href: '', label: '' },
+  otro: { href: '', label: '' },
 };
 
 function normalizeToken(value) {
@@ -32,6 +35,9 @@ function resolveSocialType(tipo, nombre) {
   if (token.includes('instagram') || token === 'ig') return 'instagram';
   if (token.includes('facebook') || token === 'fb') return 'facebook';
   if (token.includes('tiktok') || token.includes('ticktock')) return 'tiktok';
+  if (token.includes('youtube') || token === 'yt') return 'youtube';
+  if (token.includes('spotify')) return 'spotify';
+  if (['otro', 'other', 'website', 'web', 'sitio', 'link'].includes(token)) return 'otro';
   if (token.includes('correo') || token.includes('email') || token.includes('mail')) return 'email';
 
   return null;
@@ -65,6 +71,9 @@ export function buildSocialLinksMap(input, fallback = {}) {
     facebook: { ...DEFAULT_SOCIAL_LINKS.facebook, ...(fallback.facebook || {}) },
     tiktok: { ...DEFAULT_SOCIAL_LINKS.tiktok, ...(fallback.tiktok || {}) },
     email: { ...DEFAULT_SOCIAL_LINKS.email, ...(fallback.email || {}) },
+    youtube: { ...DEFAULT_SOCIAL_LINKS.youtube, ...(fallback.youtube || {}) },
+    spotify: { ...DEFAULT_SOCIAL_LINKS.spotify, ...(fallback.spotify || {}) },
+    otro: { ...DEFAULT_SOCIAL_LINKS.otro, ...(fallback.otro || {}) },
   };
 
   if (!Array.isArray(input)) {

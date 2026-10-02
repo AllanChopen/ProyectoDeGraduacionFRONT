@@ -29,7 +29,9 @@ export const apiClient = async (endpoint, options = {}) => {
     } catch {
       // response had no JSON body
     }
-    throw new Error(message);
+    const error = new Error(message);
+    error.status = response.status;
+    throw error;
   }
 
   if (response.status === 204) {
