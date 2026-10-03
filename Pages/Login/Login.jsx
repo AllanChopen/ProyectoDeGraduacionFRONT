@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../src/context/AuthContext';
 import { requestPasswordReset, resetPassword } from '../../src/api/authApi';
 import './Login.css';
@@ -68,13 +68,21 @@ function Login() {
       const bandSlug = authData?.band?.slug;
 
       if (bandSlug) {
-        navigate(`/${bandSlug}/dashboard`, { replace: true });
+        const from = location.state?.from;
+        const destination = from === '/onboarding' || from === '/onboarding/completed'
+          ? from
+          : `/${bandSlug}/dashboard`;
+        navigate(destination, { replace: true });
         return;
       }
 
       navigate(location.state?.from || '/', { replace: true });
-    } catch (requestError) {
-      setError(requestError.message || 'Correo o contrasena incorrectos.');
+    } catch (err) {
+      setError(
+        err.status === 401
+          ? 'Correo o contraseña incorrectos.'
+          : err.message || 'No se pudo iniciar sesión. Inténtalo de nuevo.'
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -118,6 +126,7 @@ function Login() {
             <button type="button" className="login-link" onClick={() => { setError(''); setNotice(''); setRecoveryStep('request'); }}>
               Olvide mi contrasena
             </button>
+            <Link to="/register">Crear mi Backstage</Link>
           </form>
         ) : recoveryStep === 'request' ? (
           <form className="login-form" onSubmit={handleRequestReset}>

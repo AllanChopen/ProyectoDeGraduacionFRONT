@@ -33,28 +33,15 @@ function readStoredUser(slug) {
 export function AuthProvider({ children }) {
   const [sessions, setSessions] = useState(() => readAuthSessions());
   const [activeSlug, setActiveSlug] = useState(() => readActiveAuthSlug());
-  const [isHydrated, setIsHydrated] = useState(false);
 
   const activeSession = activeSlug ? sessions[activeSlug] ?? null : null;
   const token = activeSession?.token ?? null;
-  const user = activeSession?.user ?? readStoredUser();
+  const user = activeSession?.user ?? null;
 
   const claims = useMemo(() => (token ? decodeJwt(token) : null), [token]);
 
   const role = claims?.['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ?? null;
   const bandaId = claims?.BandaId ?? null;
-
-  useEffect(() => {
-    if (!isHydrated) {
-      writeAuthSessions(sessions);
-      writeActiveAuthSlug(activeSlug);
-      setIsHydrated(true);
-      return;
-    }
-
-    writeAuthSessions(sessions);
-    writeActiveAuthSlug(activeSlug);
-  }, [activeSlug, isHydrated, sessions]);
 
   useEffect(() => {
     let isMounted = true;
@@ -80,7 +67,13 @@ export function AuthProvider({ children }) {
           skipAuth: true,
           headers: { Authorization: `Bearer ${legacyToken}` },
         });
-        if (!isMounted || !band?.slug) {
+
+        if (
+          !isMounted ||
+          !band?.slug ||
+          Object.keys(readAuthSessions()).length > 0 ||
+          localStorage.getItem(LEGACY_TOKEN_STORAGE_KEY) !== legacyToken
+        ) {
           return;
         }
 
@@ -89,7 +82,8 @@ export function AuthProvider({ children }) {
           user: readStoredUser(),
         });
         setSessions(migratedSessions);
-        setActiveSlug((current) => current || band.slug);
+        setActiveSlug(band.slug);
+        writeActiveAuthSlug(band.slug);
       } catch {
         // Legacy token is left untouched as a fallback for older storage.
       }
@@ -111,12 +105,45 @@ export function AuthProvider({ children }) {
       throw new Error('No se pudo identificar la banda de la sesion.');
     }
 
+    const sessionEmails = [
+      data.user?.email,
+      claimsData?.email,
+      claimsData?.['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'],
+    ].filter(Boolean);
+
+    if (
+      sessionEmails.some(
+        (sessionEmail) =>
+          String(sessionEmail).trim().toLowerCase() !==
+          email.trim().toLowerCase()
+      )
+    ) {
+      throw new Error(
+        'El API devolvio una sesion para otro correo. Revisa la respuesta de /api/Auth/login.'
+      );
+    }
+
     const band = await getMyBand({
       skipAuth: true,
       headers: { Authorization: `Bearer ${data.token}` },
     });
-    if (!band?.slug || String(band.id) !== String(managedBandId)) {
-      throw new Error('No se pudo identificar la banda asociada a esta cuenta.');
+
+    if (!band?.slug) {
+      throw new Error(
+        'No se pudo identificar la banda asociada a esta cuenta.'
+      );
+    }
+
+    const returnedBandId = band.id ?? band.bandaId;
+
+    if (
+      returnedBandId != null &&
+      String(returnedBandId).toLowerCase() !==
+        String(managedBandId).toLowerCase()
+    ) {
+      throw new Error(
+        `El API devolvio la banda ${returnedBandId} (${band.slug}) para el BandaId ${managedBandId} del login.`
+      );
     }
 
     const nextSession = {
@@ -124,12 +151,20 @@ export function AuthProvider({ children }) {
       user: data.user ?? null,
     };
 
-    setSessions((current) => {
-      const next = storeSessionForSlug(band.slug, nextSession);
-      return next;
-    });
+    setSessions(storeSessionForSlug(band.slug, nextSession));
     setActiveSlug(band.slug);
+    writeActiveAuthSlug(band.slug);
     return { ...data, band };
+  };
+
+  const registerSession = (data) => {
+    if (!data?.token || !data?.banda?.slug) {
+      throw new Error('No se pudo recuperar la sesión de tu banda.');
+    }
+    const slug = data.banda.slug;
+    setSessions(storeSessionForSlug(slug, { token: data.token, user: data.user }));
+    setActiveSlug(slug);
+    writeActiveAuthSlug(slug);
   };
 
   const logout = () => {
@@ -149,6 +184,8 @@ export function AuthProvider({ children }) {
     }
 
     setActiveSlug(slug);
+    // Keep API calls made during this navigation on the same band's token.
+    writeActiveAuthSlug(slug);
     return true;
   };
 
@@ -162,6 +199,7 @@ export function AuthProvider({ children }) {
     hasSessionForSlug,
     activateSession,
     login,
+    registerSession,
     logout,
   };
 

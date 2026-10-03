@@ -11,6 +11,7 @@ import DashboardShows from '../Pages/Dashboard/DashboardShows';
 import DashboardOrders from '../Pages/Dashboard/DashboardOrders';
 import DashboardOrderDetail from '../Pages/Dashboard/DashboardOrderDetail';
 import Login from '../Pages/Login/Login';
+import Onboarding from '../Pages/Onboarding/Onboarding';
 import { Route, Routes } from 'react-router-dom';
 import PostDetail from '../Pages/PostDetail/PostDetail';
 import ProductDetail from '../Pages/ProductDetail/ProductDetail';
@@ -30,6 +31,9 @@ function App() {
         <Routes>
     <Route path="/" element={<Landing />} />
     <Route path="/login" element={<Login />} />
+    <Route path="/register" element={<Onboarding />} />
+    <Route path="/onboarding" element={<Onboarding />} />
+    <Route path="/onboarding/completed" element={<Onboarding completed />} />
     <Route path="/404" element={<NotFound />} />
     <Route path="/carrito" element={<NotFound />} />
     <Route path="/:slug/carrito" element={<Cart />} />

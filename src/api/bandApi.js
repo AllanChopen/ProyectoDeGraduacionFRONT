@@ -37,8 +37,8 @@ export const getBands = async () => {
   return apiClient('/api/Bandas');
 };
 
-export const getBandById = async (id) => {
-  return apiClient(`/api/Bandas/${id}`);
+export const getBandById = async (id, options = {}) => {
+  return apiClient(`/api/Bandas/${id}`, options);
 };
 
 export const getMyBand = async (options = {}) => {
@@ -61,7 +61,7 @@ export const updateMyBandShippingPrice = async (precioEnvio) => {
 };
 
 export const getPublicBand = async (slug) => {
-  return apiClient(`/api/Bandas/public/${slug}`);
+  return apiClient(`/api/Bandas/public/${slug}`, { skipAuth: true });
 };
 
 export const mapBand = (data) => ({
@@ -71,6 +71,8 @@ export const mapBand = (data) => ({
   descripcion: data?.descripcion,
   biografia: data?.biografia,
   imagenUrl: data?.imagenUrl,
+  logoUrl: data?.logoUrl,
+  portadaUrl: data?.portadaUrl,
   biografiaImagenUrl: data?.biografiaImagenUrl,
   genero: data?.genero,
   precioEnvio: Number(data?.precioEnvio ?? 0),

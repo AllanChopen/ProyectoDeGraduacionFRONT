@@ -226,3 +226,5 @@
     width: 100vw;
   }
 }
+.site-header .logo-mark img.band-logo-image,
+.bp-band-home .logo-mark img.band-logo-image { filter: none; object-fit: contain; }

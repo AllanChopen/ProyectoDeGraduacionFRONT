@@ -21,7 +21,7 @@ function NavBar() {
   const [brandLogoUrl, setBrandLogoUrl] = useState('');
   const [socialLinks, setSocialLinks] = useState(() => buildSocialLinksMap());
   const { merchTotalItems } = useCart();
-  const { bandaId, isAuthenticated, logout } = useAuth();
+  const { bandaId, activeSlug, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -33,11 +33,7 @@ function NavBar() {
     : managedSlug
       ? `/${managedSlug}`
       : '/';
-  const dashboardPath = bandSlug
-    ? `/${bandSlug}/dashboard`
-    : managedSlug
-      ? `/${managedSlug}/dashboard`
-      : '/login';
+  const dashboardPath = activeSlug ? `/${activeSlug}/dashboard` : '/login';
 
   useEffect(() => {
     setIsOpen(false);
@@ -285,6 +281,11 @@ function NavBar() {
               <img src="/icons/tiktok.svg" alt="TikTok" />
             </a>
           ) : null}
+          {['youtube', 'spotify', 'otro'].map((type) => socialLinks[type].href ? (
+            <a key={type} href={socialLinks[type].href} target="_blank" rel="noreferrer" className="ico" aria-label={socialLinks[type].label || (type === 'youtube' ? 'YouTube' : type === 'spotify' ? 'Spotify' : 'Otro enlace')} title={socialLinks[type].label || type}>
+              <img src={`/icons/${type === 'otro' ? 'link' : type}.svg`} alt="" />
+            </a>
+          ) : null)}
           {socialLinks.email.href ? (
             <a href={socialLinks.email.href} aria-label="Email" className="ico" title="Email">
               <img src="/icons/mail.svg" alt="Email" />

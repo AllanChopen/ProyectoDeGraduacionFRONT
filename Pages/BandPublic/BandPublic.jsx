@@ -129,7 +129,7 @@ function BandPublic() {
   return (
     <main className="bp-page bp-band-home" ref={pageRef}>
       <NavBar />
-      <Hero title={band?.nombre} subtitle={band?.descripcion} image={band?.imagenUrl || heroImage} genre={band?.genero} />
+      <Hero title={band?.nombre} subtitle={band?.descripcion} image={band?.portadaUrl || band?.imagenUrl || heroImage} genre={band?.genero} />
       <div className="bp-band-strip" aria-hidden="true">
         <span>{band?.nombre}</span><span>✳</span><span>SUBE EL VOLUMEN</span><span>✳</span><span>{band?.genero || 'LIVE MUSIC'}</span>
       </div>

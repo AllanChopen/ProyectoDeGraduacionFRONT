@@ -135,6 +135,14 @@ function Footer() {
                   <span className="contact-text">{socialLinks.tiktok.label || socialLinks.tiktok.href}</span>
                 </li>
               ) : null}
+              {['youtube', 'spotify', 'otro'].map((type) => socialLinks[type].href ? (
+                <li key={type}>
+                  <a href={socialLinks[type].href} className="ico" aria-label={socialLinks[type].label || (type === 'youtube' ? 'YouTube' : type === 'spotify' ? 'Spotify' : 'Otro enlace')} target="_blank" rel="noreferrer">
+                    <img src={`/icons/${type === 'otro' ? 'link' : type}.svg`} alt="" />
+                  </a>
+                  <span className="contact-text">{socialLinks[type].label || socialLinks[type].href}</span>
+                </li>
+              ) : null)}
               {socialLinks.email.href ? (
                 <li>
                   <a href={socialLinks.email.href} className="ico" aria-label="Email">
