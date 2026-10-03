@@ -16,6 +16,7 @@ function Footer() {
   const year = new Date().getFullYear();
   const location = useLocation();
   const [brandName, setBrandName] = useState('');
+  const [brandLogoUrl, setBrandLogoUrl] = useState('');
   const [socialLinks, setSocialLinks] = useState(() => buildSocialLinksMap());
   const bandSlug = useMemo(() => getBandSlug(location.pathname), [location.pathname]);
 
@@ -26,6 +27,7 @@ function Footer() {
       if (!bandSlug) {
         if (isMounted) {
           setBrandName('');
+          setBrandLogoUrl('');
         }
         return;
       }
@@ -34,10 +36,12 @@ function Footer() {
         const band = await getPublicBand(bandSlug);
         if (isMounted) {
           setBrandName(band?.nombre || '');
+          setBrandLogoUrl(band?.logoUrl || '');
         }
       } catch {
         if (isMounted) {
           setBrandName('');
+          setBrandLogoUrl('');
         }
       }
     };
@@ -84,6 +88,7 @@ function Footer() {
       <div className="footer-grid">
         <div className="footer-brand">
           <div className="logo small">
+            {brandLogoUrl ? <img className="footer-band-logo" src={brandLogoUrl} alt="" /> : null}
             {brandName ? <span className="logo-text">{brandName}</span> : null}
           </div>
           <div className="footer-contact">
@@ -142,9 +147,11 @@ function Footer() {
           </div>
         </div>
 
-        <div className="footer-logo-right" aria-hidden="true">
-          <img src="/icons/cart.svg" alt={brandName ? `${brandName} logo` : 'Logo de banda'} />
-        </div>
+        {brandLogoUrl ? (
+          <div className="footer-logo-right" aria-hidden="true">
+            <img src={brandLogoUrl} alt="" />
+          </div>
+        ) : null}
       </div>
 
       <div className="sub-footer">

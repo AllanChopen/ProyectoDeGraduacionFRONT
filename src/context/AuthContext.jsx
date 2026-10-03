@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { getBandById } from '../api/bandApi';
+import { getMyBand } from '../api/bandApi';
 import { login as loginRequest } from '../api/authApi';
 import { decodeJwt } from '../utils/jwt';
 import {
@@ -76,7 +76,10 @@ export function AuthProvider({ children }) {
       }
 
       try {
-        const band = await getBandById(legacyBandId);
+        const band = await getMyBand({
+          skipAuth: true,
+          headers: { Authorization: `Bearer ${legacyToken}` },
+        });
         if (!isMounted || !band?.slug) {
           return;
         }
@@ -108,9 +111,12 @@ export function AuthProvider({ children }) {
       throw new Error('No se pudo identificar la banda de la sesion.');
     }
 
-    const band = await getBandById(managedBandId);
-    if (!band?.slug) {
-      throw new Error('No se pudo identificar la banda de la sesion.');
+    const band = await getMyBand({
+      skipAuth: true,
+      headers: { Authorization: `Bearer ${data.token}` },
+    });
+    if (!band?.slug || String(band.id) !== String(managedBandId)) {
+      throw new Error('No se pudo identificar la banda asociada a esta cuenta.');
     }
 
     const nextSession = {

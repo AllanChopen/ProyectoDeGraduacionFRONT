@@ -39,7 +39,7 @@ function Icon({ name, className = '' }) {
 }
 
 function Brand() {
-  return <span className="landing-brand"><span className="landing-brand-mark" aria-hidden="true">✳</span>BACKSTAGE<span className="landing-brand-period" aria-hidden="true">✦</span></span>;
+  return <span className="landing-brand"><img className="landing-brand-mark" src="/backstage.svg?v=2" alt="" />BACKSTAGE<span className="landing-brand-period" aria-hidden="true">✦</span></span>;
 }
 
 function RegisterLink({ children = 'Crear mi Backstage', className = '' }) {
@@ -61,12 +61,6 @@ function Landing() {
   const [activeFeature, setActiveFeature] = useState(0);
   const menuButton = useRef(null);
   const selectedFeature = features[activeFeature];
-
-  useEffect(() => {
-    const previousTitle = document.title;
-    document.title = 'Backstage — Todo lo que necesita tu banda';
-    return () => { document.title = previousTitle; };
-  }, []);
 
   useEffect(() => {
     if (!menuOpen) return undefined;

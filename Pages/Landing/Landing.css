@@ -217,10 +217,10 @@
 }
 
 .landing-page .landing-brand-mark {
-  color: var(--landing-accent);
-  font-size: 37px;
-  font-weight: 400;
-  line-height: 0.8;
+  display: block;
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
 }
 
 .landing-page .landing-brand-period {
@@ -1507,7 +1507,7 @@
   .landing-page section[id] { scroll-margin-top: 85px; }
   .landing-page .landing-header-inner { min-height: 67px; gap: 14px; }
   .landing-page .landing-brand { gap: 7px; font-size: 17px; }
-  .landing-page .landing-brand-mark { font-size: 32px; }
+  .landing-page .landing-brand-mark { width: 27px; height: 27px; }
   .landing-page .landing-header .landing-button-small { padding: 10px 11px; gap: 8px; font-size: 10px; }
   .landing-page .landing-eyebrow { margin-bottom: 20px; font-size: 8px; }
   .landing-page h2 { font-size: clamp(33px, 8.4vw, 44px); }

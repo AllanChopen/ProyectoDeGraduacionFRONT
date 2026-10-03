@@ -18,6 +18,7 @@ function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
   const [managedSlug, setManagedSlug] = useState('');
   const [brandName, setBrandName] = useState('');
+  const [brandLogoUrl, setBrandLogoUrl] = useState('');
   const [socialLinks, setSocialLinks] = useState(() => buildSocialLinksMap());
   const { merchTotalItems } = useCart();
   const { bandaId, isAuthenticated, logout } = useAuth();
@@ -76,21 +77,43 @@ function NavBar() {
     let isMounted = true;
 
     const loadBrandName = async () => {
+      const favicon = document.querySelector('link[rel~="icon"]');
+      const setPageBrand = (name, logoUrl) => {
+        document.title = name ? `${name} | Backstage` : 'Backstage — Todo lo que necesita tu banda';
+        if (favicon) {
+          favicon.href = logoUrl || '/backstage.svg?v=2';
+          if (logoUrl) {
+            favicon.removeAttribute('type');
+          } else {
+            favicon.type = 'image/svg+xml';
+          }
+        }
+      };
+
       if (!bandSlug) {
         if (isMounted) {
           setBrandName('');
+          setBrandLogoUrl('');
+          setPageBrand('', '');
         }
         return;
       }
 
+      setPageBrand('', '');
       try {
         const band = await getPublicBand(bandSlug);
         if (isMounted) {
-          setBrandName(band?.nombre || '');
+          const name = band?.nombre || '';
+          const logoUrl = band?.logoUrl || '';
+          setBrandName(name);
+          setBrandLogoUrl(logoUrl);
+          setPageBrand(name, logoUrl);
         }
       } catch {
         if (isMounted) {
           setBrandName('');
+          setBrandLogoUrl('');
+          setPageBrand('', '');
         }
       }
     };
@@ -144,8 +167,12 @@ function NavBar() {
   return (
     <header className="site-header">
       <Link to={homePath} className="logo" onClick={closeMenu}>
-        <span className="logo-mark" aria-hidden="true">
-          <img src="/icons/cart.svg" alt="Brand icon" />
+        <span className={`logo-mark${brandLogoUrl ? ' logo-mark-band' : ''}`}>
+          {brandLogoUrl ? (
+            <img src={brandLogoUrl} alt="" />
+          ) : (
+            <img src="/icons/cart.svg" alt="" />
+          )}
         </span>
         {brandName ? <span className="logo-text">{brandName}</span> : null}
       </Link>

@@ -20,6 +20,13 @@
   color: #f0e7e8;
 }
 
+.footer-band-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 50%;
+}
+
 .social-contact-list {
   list-style: none;
   padding: 0;
@@ -47,7 +54,9 @@
 
 .footer-logo-right img {
   width: 90px;
-  height: auto;
+  height: 90px;
+  object-fit: contain;
+  border-radius: 50%;
   opacity: 0.9;
 }
 
@@ -68,5 +77,6 @@
 
   .footer-logo-right img {
     width: 72px;
+    height: 72px;
   }
 }

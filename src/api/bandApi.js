@@ -18,6 +18,10 @@ function buildBandFormData(payload) {
   appendIfPresent(formData, 'UsuarioId', String(payload.usuarioId ?? ''));
   appendIfPresent(formData, 'Slug', payload.slug);
 
+  if (payload.logoFile) {
+    formData.append('Logo', payload.logoFile);
+  }
+
   if (payload.imagenFile) {
     formData.append('Imagen', payload.imagenFile);
   }
@@ -35,6 +39,11 @@ export const getBands = async () => {
 
 export const getBandById = async (id) => {
   return apiClient(`/api/Bandas/${id}`);
+};
+
+export const getMyBand = async (options = {}) => {
+  const data = await apiClient('/api/onboarding/estado', options);
+  return data?.banda ?? null;
 };
 
 export const updateBand = async (id, payload) => {

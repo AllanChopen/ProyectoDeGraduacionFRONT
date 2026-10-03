@@ -16,6 +16,7 @@
 .dashboard-page .site-header { background: #100b11; border-bottom-color: var(--dashboard-rule); }
 .dashboard-page .header-cart { position: relative; }
 .dashboard-page :is(.cart-icon, .logo-mark img) { filter: invert(1); }
+.dashboard-page .logo-mark-band img { filter: none; }
 .dashboard-page .logo { min-width: 0; }
 .dashboard-page .logo-text { overflow-wrap: anywhere; }
 .dashboard-page .header-actions { flex-shrink: 0; }

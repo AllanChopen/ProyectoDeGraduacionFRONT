@@ -34,6 +34,7 @@ function DashboardBand() {
     descripcion: '',
     biografia: '',
   });
+  const [logoImageFile, setLogoImageFile] = useState(null);
   const [heroImageFile, setHeroImageFile] = useState(null);
   const [biographyImageFile, setBiographyImageFile] = useState(null);
   const [status, setStatus] = useState('');
@@ -124,6 +125,7 @@ function DashboardBand() {
   };
 
   const resetImageInputs = () => {
+    setLogoImageFile(null);
     setHeroImageFile(null);
     setBiographyImageFile(null);
   };
@@ -153,6 +155,7 @@ function DashboardBand() {
       genero: bandForm.genero.trim(),
       usuarioId: bandRecord.usuarioId,
       slug: bandForm.slug.trim(),
+      logoFile: logoImageFile || undefined,
       imagenFile: heroImageFile || undefined,
       biografiaImagenFile: biographyImageFile || undefined,
     };
@@ -309,6 +312,15 @@ function DashboardBand() {
                 disabled={isLoading || !bandRecord}
                 required
               />
+              <label className="bp-meta" htmlFor="band-logo-image">Logo</label>
+              <input
+                id="band-logo-image"
+                className="bp-field"
+                type="file"
+                accept="image/*"
+                onChange={(e) => setLogoImageFile(e.target.files?.[0] ?? null)}
+                disabled={isLoading || !bandRecord}
+              />
               <label className="bp-meta" htmlFor="band-hero-image">Imagen hero</label>
               <input
                 id="band-hero-image"
@@ -395,6 +407,17 @@ function DashboardBand() {
             {bandRecord ? (
               <div className="manage-list">
                 <article className="manage-item">
+                  {bandRecord.logoUrl ? (
+                    <img src={bandRecord.logoUrl} alt={`Logo de ${bandRecord.nombre || 'la banda'}`} className="manage-item-image" />
+                  ) : (
+                    <div className="manage-item-image" aria-hidden="true" />
+                  )}
+                  <div className="manage-item-copy">
+                    <strong>Logo</strong>
+                    <p className="bp-meta">Logo actual de la banda.</p>
+                  </div>
+                </article>
+                <article className="manage-item">
                   {bandRecord.imagenUrl ? (
                     <img src={bandRecord.imagenUrl} alt={bandRecord.nombre || 'Hero de la banda'} className="manage-item-image" />
                   ) : (
@@ -403,7 +426,6 @@ function DashboardBand() {
                   <div className="manage-item-copy">
                     <strong>Hero publica</strong>
                     <p className="bp-meta">Se usa en el encabezado principal de la pagina publica.</p>
-                    <p className="bp-meta">{bandRecord.imagenUrl || 'Sin imagen cargada.'}</p>
                   </div>
                 </article>
                 <article className="manage-item">
@@ -415,7 +437,6 @@ function DashboardBand() {
                   <div className="manage-item-copy">
                     <strong>Imagen de biografia</strong>
                     <p className="bp-meta">Acompana la seccion de biografia en la pagina publica.</p>
-                    <p className="bp-meta">{bandRecord.biografiaImagenUrl || 'Sin imagen cargada.'}</p>
                   </div>
                 </article>
               </div>
